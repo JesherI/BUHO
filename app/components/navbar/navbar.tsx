@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const Navbar: React.FC = () => {
   return (
@@ -8,12 +9,12 @@ const Navbar: React.FC = () => {
       </div>
 
       <div className="flex items-center space-x-4">
-        <a href="/login" className="text-white border-b-2 border-transparent hover:border-amber-400 transition">
+        <Link href="/login" className="text-white border-b-2 border-transparent hover:border-amber-400 transition">
           Log In
-        </a>
-        <a href="/signup" className="text-white border-b-2 border-transparent hover:border-amber-400 transition">
+        </Link>
+        <Link href="/signup" className="text-white border-b-2 border-transparent hover:border-amber-400 transition">
           Sign Up
-        </a>
+        </Link>
       </div>
     </nav>
   );
