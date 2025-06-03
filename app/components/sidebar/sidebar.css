@@ -1,0 +1,217 @@
+.sidebar-toggle {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 2000;
+  background-color: #292929;
+  padding: 10px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.sidebar-toggle:hover {
+  background-color: #444;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 270px;
+  height: 100vh;
+  background: linear-gradient(180deg, #1f1f1f 0%, #121212 100%);
+  color: #f5f5f5;
+  padding: 70px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+  transform: translateX(-100%);
+  overflow: hidden;
+  border-right: 1px solid #333;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  gap: 20px;
+}
+
+/* NUEVO CHAT y BUSCAR */
+.sidebar-top {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.new-chat-btn {
+  background-color: #ffefc2;
+  color: #1e1e1e;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.3s;
+}
+
+.new-chat-btn i {
+  font-size: 1rem;
+}
+
+.new-chat-btn:hover {
+  background-color: #ffd792;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: #2a2a2a;
+  border-radius: 5px;
+  padding: 6px 10px;
+}
+
+.search-input-wrapper i {
+  color: #ccc;
+  margin-right: 8px;
+  font-size: 0.95rem;
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  color: #fff;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.search-input::placeholder {
+  color: #ccc;
+}
+
+/* HISTORIAL Y TAREAS */
+.sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.sidebar-section h2 {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffefc2;
+  border-bottom: 1px solid #444;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.conversation-list,
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.conversation-list li,
+.task-list li {
+  font-size: 0.9rem;
+  padding: 10px 0;
+  border-bottom: 1px solid #333;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: #e0e0e0;
+}
+
+.conversation-list li:hover,
+.task-list li:hover {
+  background-color: #2a2a2a;
+  border-radius: 5px;
+  padding-left: 8px;
+}
+
+.sidebar-button {
+  background-color: #333;
+  color: #f0f0f0;
+  border: none;
+  padding: 8px 12px;
+  margin-top: 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.sidebar-button:hover {
+  background-color: #444;
+  color: #fff;
+}
+
+.task-toggle {
+  background: none;
+  border: none;
+  color: #ffefc2;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+  padding: 6px 0;
+  transition: color 0.2s ease;
+}
+
+.task-toggle:hover {
+  color: #ffffff;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 220px;
+    padding: 60px 15px 15px;
+  }
+
+  .sidebar-toggle {
+    padding: 8px;
+  }
+
+  .sidebar-section h2 {
+    font-size: 0.95rem;
+  }
+
+  .conversation-list li,
+  .task-list li {
+    font-size: 0.85rem;
+  }
+
+  .new-chat-btn {
+    font-size: 0.85rem;
+  }
+
+  .search-input {
+    font-size: 0.85rem;
+  }
+
+  .search-input-wrapper i {
+    font-size: 0.85rem;
+  }
+}
