@@ -9,10 +9,10 @@ const Navbar: React.FC = () => {
       </div>
 
       <div className="flex items-center space-x-4">
-        <Link href="/login" className="text-white border-b-2 border-transparent hover:border-amber-400 transition">
+        <Link href="/log-in" className="text-white border-b-2 border-transparent hover:border-amber-400 transition">
           Log In
         </Link>
-        <Link href="/signup" className="text-white border-b-2 border-transparent hover:border-amber-400 transition">
+        <Link href="/sign-up" className="text-white border-b-2 border-transparent hover:border-amber-400 transition">
           Sign Up
         </Link>
       </div>
