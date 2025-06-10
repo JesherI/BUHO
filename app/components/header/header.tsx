@@ -2,12 +2,12 @@
 import React, { useEffect, useState } from "react";
 import "./header.css";
 import Sidebar from "../sidebar/sidebar";
-
+import ProfileMenu from "../profileMenu/profileMenu";
 
 const Header: React.FC = () => {
   const fullText = "Bienvenido a Buho";
   const [displayedText, setDisplayedText] = useState("");
-  const [showSidebar, setShowSidebar] = useState(false); //  mostar Sidebar
+  const [showSidebar, setShowSidebar] = useState(false);
 
   useEffect(() => {
     let index = 0;
@@ -21,25 +21,29 @@ const Header: React.FC = () => {
   }, []);
 
   const handleStart = () => {
-    setShowSidebar(true); // Mostrar Sidebar al hacer clic
+    setShowSidebar(true);
   };
 
   return (
     <>
       <header className="header">
-        <h1 className="title">
-          {displayedText}
-          <span className="cursor">|</span>
-        </h1>
-        <p className="subtitle">
-          Tu asistente inteligente para aprender y resolver dudas.
-        </p>
-        <button className="start-button" onClick={handleStart}>
-          Comenzar
-        </button>
+        <div className="header-left">
+          <h1 className="title">
+            {displayedText}
+            <span className="cursor">|</span>
+          </h1>
+          <p className="subtitle">
+            Tu asistente inteligente para aprender y resolver dudas.
+          </p>
+          <button className="start-button" onClick={handleStart}>
+            Comenzar
+          </button>
+        </div>
+        <div className="header-right">
+          <ProfileMenu />
+        </div>
       </header>
-
-      {showSidebar && <Sidebar />} 
+      {showSidebar && <Sidebar />}
     </>
   );
 };
