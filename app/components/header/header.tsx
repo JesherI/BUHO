@@ -39,9 +39,6 @@ const Header: React.FC = () => {
             Comenzar
           </button>
         </div>
-        <div className="header-right">
-          <ProfileMenu />
-        </div>
       </header>
       {showSidebar && <Sidebar />}
     </>

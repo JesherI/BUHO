@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Menu, MenuItem, Avatar, Divider, ListItemIcon } from "@mui/material"; //npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
+import { Menu, MenuItem, Avatar, Divider, ListItemIcon } from "@mui/material";
 import { AccountCircle, Settings, Logout, Person, PhotoCamera, Gavel } from "@mui/icons-material";
 import "./profileMenu.css";
 
