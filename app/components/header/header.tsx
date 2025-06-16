@@ -1,10 +1,387 @@
-import React from "react";
+"use client";
+import React, { useRef, useState, useEffect } from "react";
+import { MessageCircle, CheckSquare, Mic, Calendar, ChevronDown, Play, ArrowRight, Star, GraduationCap, Sparkles, Brain, Zap, Check, Send } from "lucide-react";
+
+const preguntasEjemplo = [
+  {
+    pregunta: "¿Cómo funciona Buho IA?",
+    respuesta: "Buho IA responde tus dudas escolares mediante chat de texto o voz y te ayuda a organizar tus tareas.",
+  },
+  {
+    pregunta: "¿Puedo añadir tareas a la agenda?",
+    respuesta: "Sí, Buho IA incluye una agenda para que agregues recordatorios y tareas directamente desde el chat.",
+  },
+  {
+    pregunta: "¿Es seguro usar Buho IA?",
+    respuesta: "Sí, la privacidad y seguridad de tus datos es una prioridad en Buho IA.",
+  },
+  {
+    pregunta: "¿Cuánto cuesta usar Buho IA?",
+    respuesta: "Buho IA ofrece un plan totalmente gratuito con funciones básicas y características avanzadas para potenciar tu experiencia educativa.",
+  },
+];
 
 const Header: React.FC = () => {
-    return (
-        <>
-        </>
-    );
+  const [activePregunta, setActivePregunta] = useState<number | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const preguntasRef = useRef<HTMLDivElement>(null!);
+  const featuresRef = useRef<HTMLDivElement>(null!);
+  const videoRef = useRef<HTMLDivElement>(null!);
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const togglePregunta = (index: number) => {
+    setActivePregunta(activePregunta === index ? null : index);
+  };
+
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsTyping(true);
+      setTimeout(() => setIsTyping(false), 2000);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const features = [
+    "Respuestas inteligentes a preguntas académicas",
+    "Interacción por voz y texto",
+    "Organización automática de tareas",
+    "Agenda personal integrada",
+    "Recordatorios inteligentes",
+    "Disponible 24/7",
+  ];
+
+  const stats = [
+    { number: "24/7", label: "Disponible" },
+    { number: "∞", label: "Preguntas" },
+    { number: "100%", label: "Gratis" },
+  ];
+
+  return (
+    <div className="bg-black text-white min-h-screen">
+      <section className="min-h-screen flex items-center">
+        <div className="container mx-auto px-6 py-20">
+          <div className="max-w-5xl mx-auto">
+
+            <div className="mb-8">
+              <div className="inline-flex items-center gap-2 border border-amber-500/30 rounded-full px-4 py-2 text-sm backdrop-blur-sm bg-amber-500/5">
+                <Star className="w-4 h-4 text-amber-400" />
+                <span className="text-amber-400">
+                  Asistente educativo inteligente
+                </span>
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+
+              <div className="space-y-8">
+                <div className="space-y-6">
+                  <h1 className="text-4xl md:text-6xl font-light leading-tight">
+                    Conoce a{" "}
+                    <span className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 bg-clip-text text-transparent font-normal animate-pulse">
+                      Buho IA
+                    </span>
+                  </h1>
+
+                  <p className="text-xl text-gray-300 leading-relaxed">
+                    Tu compañero inteligente para el aprendizaje. Resuelve dudas,
+                    organiza tareas y potencia tu educación con inteligencia artificial.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    onClick={() => scrollToSection(videoRef)}
+                    className="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-amber-500/25 transform hover:scale-105"
+                  >
+                    <Play className="w-4 h-4" />
+                    Ver Demo
+                  </button>
+
+                  <button
+                    onClick={() => scrollToSection(featuresRef)}
+                    className="border border-gray-600 hover:border-amber-500/50 hover:bg-gray-900 px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg"
+                  >
+                    Conocer más
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-8">
+                <div className="grid grid-cols-3 gap-8">
+                  {stats.map(({ number, label }, i) => (
+                    <div key={i} className="text-center group cursor-default">
+                      <div className="text-3xl font-light text-amber-100 mb-2 group-hover:text-amber-300 transition-colors duration-300 group-hover:scale-110 transform">{number}</div>
+                      <div className="text-sm text-gray-400 uppercase tracking-wide group-hover:text-gray-300 transition-colors duration-300">{label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-300">¿Qué incluye?</h3>
+                  <div className="space-y-3">
+                    {features.map((feature, i) => (
+                      <div key={i} className="flex items-center gap-3 group">
+                        <div className="w-5 h-5 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-400/30 transition-colors duration-300">
+                          <Check className="w-3 h-3 text-amber-400" />
+                        </div>
+                        <span className="text-gray-300 group-hover:text-white transition-colors duration-300">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section ref={videoRef} className="py-20 border-t border-gray-800">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-light mb-4">
+                Mira <span className="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">Buho IA</span> en acción
+              </h2>
+              <p className="text-lg text-gray-400">
+                Descubre cómo funciona nuestra inteligencia artificial
+              </p>
+            </div>
+
+            <div className="aspect-video bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-amber-200/30 transition-colors duration-300">
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center space-y-6">
+                  <div className="w-16 h-16 border border-gray-700 rounded-full flex items-center justify-center mx-auto cursor-pointer hover:border-amber-200 hover:bg-amber-400/10 transition-all duration-300 group">
+                    <Play className="w-6 h-6 text-gray-400 group-hover:text-amber-200 ml-0.5 transition-colors duration-300" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-medium mb-2">
+                      Demo de Buho IA
+                    </h3>
+                    <p className="text-gray-500">Video próximamente</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section ref={featuresRef} className="py-20 border-t border-gray-800">
+        <div className="container mx-auto px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+
+              <div className="space-y-8">
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-light mb-6">
+                    Diseñado para{" "}
+                    <span className="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">estudiantes</span>
+                  </h2>
+                  <p className="text-lg text-gray-400 leading-relaxed">
+                    Buho IA comprende tus necesidades académicas y se adapta a tu forma de aprender.
+                    No es solo un chatbot, es tu compañero de estudios inteligente.
+                  </p>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex gap-4 group">
+                    <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-amber-400/30 transition-colors duration-300">
+                      <MessageCircle className="w-3 h-3 text-amber-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium mb-2 group-hover:text-amber-400 transition-colors duration-300">Conversación natural</h3>
+                      <p className="text-gray-400">Pregunta como si hablaras con un compañero de clase. Buho IA entiende el contexto y te responde de manera clara.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 group">
+                    <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-amber-400/30 transition-colors duration-300">
+                      <Brain className="w-3 h-3 text-amber-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium mb-2 group-hover:text-amber-400 transition-colors duration-300">Aprendizaje personalizado</h3>
+                      <p className="text-gray-400">Se adapta a tu nivel y estilo de aprendizaje para ofrecerte explicaciones que realmente entiendas.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 group">
+                    <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-amber-400/30 transition-colors duration-300">
+                      <Zap className="w-3 h-3 text-amber-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium mb-2 group-hover:text-amber-400 transition-colors duration-300">Siempre disponible</h3>
+                      <p className="text-gray-400">No importa la hora, Buho IA está listo para ayudarte cuando lo necesites.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl p-6 space-y-4 shadow-2xl">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                      <span className="text-black font-bold text-sm">BIA</span>
+                    </div>
+                    <div>
+                      <div className="font-medium">Buho IA</div>
+                      <div className="text-sm text-green-800 flex items-center gap-1">
+                        <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
+                        En línea
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-end animate-slide-in-right">
+                      <div className="bg-gradient-to-r from-[#f5deb3] via-[#d4af37] to-[#cfae7b] text-black px-4 py-2 rounded-lg max-w-xs shadow-md">
+                        ¿Puedes ayudarme con matemáticas?
+                      </div>
+                    </div>
+
+                    <div className="flex animate-slide-in-left">
+                      <div className="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg max-w-xs shadow-lg">
+                        ¡Por supuesto! ¿Qué tema específico te gustaría repasar?
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end animate-slide-in-right" style={{ animationDelay: '0.5s' }}>
+                      <div className="bg-gradient-to-r from-[#f5deb3] via-[#d4af37] to-[#cfae7b] text-black px-4 py-2 rounded-lg max-w-xs shadow-md">
+                        Ecuaciones cuadráticas
+                      </div>
+                    </div>
+
+                    <div className="flex animate-slide-in-left" style={{ animationDelay: '1s' }}>
+                      <div className="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg max-w-sm shadow-lg">
+                        Perfecto. Te explicaré paso a paso cómo resolver ecuaciones cuadráticas...
+                      </div>
+                    </div>
+
+                    {isTyping && (
+                      <div className="flex animate-slide-in-left">
+                        <div className="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg shadow-lg">
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-4 border-t border-gray-700">
+                    <div className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-500 transition-colors duration-300 focus-within:border-amber-400">
+                      Escribe tu pregunta...
+                    </div>
+                    <button className="p-2 text-amber-400 hover:bg-gray-800 rounded-lg transition-all duration-300 hover:scale-110">
+                      <Mic className="w-4 h-4" />
+                    </button>
+                    <button className="p-2 text-amber-400 hover:bg-gray-800 rounded-lg transition-all duration-300 hover:scale-110">
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <section ref={preguntasRef} className="py-20 border-t border-gray-800">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-light mb-4">
+              Preguntas <span className="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">frecuentes</span>
+            </h2>
+            <p className="text-lg text-gray-400">Resuelve tus dudas sobre Buho IA</p>
+          </div>
+
+          <div className="max-w-3xl mx-auto space-y-4">
+            {preguntasEjemplo.map(({ pregunta, respuesta }, i) => {
+              const isOpen = activePregunta === i;
+              return (
+                <div key={i} className="border border-gray-800 rounded-lg overflow-hidden hover:border-amber-500/30 transition-colors duration-300">
+                  <button
+                    onClick={() => togglePregunta(i)}
+                    className="w-full flex justify-between items-center p-6 text-left hover:bg-gray-900 transition-colors duration-300"
+                  >
+                    <span className="font-medium pr-4">{pregunta}</span>
+                    <div className={`text-gray-400 flex-shrink-0 transition-all duration-300 ${isOpen ? 'rotate-180 text-amber-400' : ''}`}>
+                      <ChevronDown className="w-5 h-5" />
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="border-t border-gray-800 bg-gray-900/50 animate-slide-down">
+                      <div className="p-6">
+                        <p className="text-gray-300 leading-relaxed">{respuesta}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <style jsx>{`
+        @keyframes slide-in-right {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes slide-in-left {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes slide-down {
+          from {
+            opacity: 0;
+            max-height: 0;
+          }
+          to {
+            opacity: 1;
+            max-height: 200px;
+          }
+        }
+        
+        .animate-slide-in-right {
+          animation: slide-in-right 0.5s ease-out forwards;
+        }
+        
+        .animate-slide-in-left {
+          animation: slide-in-left 0.5s ease-out forwards;
+        }
+        
+        .animate-slide-down {
+          animation: slide-down 0.3s ease-out forwards;
+        }
+      `}</style>
+    </div>
+  );
 };
 
-export default Header
+export default Header;
