@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Menu, MenuItem, Avatar, Divider, ListItemIcon } from "@mui/material";
 import { AccountCircle, Settings, Logout, Person, PhotoCamera, Gavel } from "@mui/icons-material";
-import "./profileMenu.css";
 
 const ProfileMenu: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

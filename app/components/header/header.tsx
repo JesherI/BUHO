@@ -39,7 +39,6 @@ const Header: React.FC = () => {
     setActivePregunta(activePregunta === index ? null : index);
   };
 
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsTyping(true);
@@ -98,7 +97,7 @@ const Header: React.FC = () => {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <button
                     onClick={() => scrollToSection(videoRef)}
-                    className="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-amber-500/25 transform hover:scale-105"
+                    className="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-amber-500/25 transform hover:scale-105 cursor-pointer"
                   >
                     <Play className="w-4 h-4" />
                     Ver Demo
@@ -106,7 +105,7 @@ const Header: React.FC = () => {
 
                   <button
                     onClick={() => scrollToSection(featuresRef)}
-                    className="border border-gray-600 hover:border-amber-500/50 hover:bg-gray-900 px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg"
+                    className="border border-gray-600 hover:border-amber-500/50 hover:bg-gray-900 px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg cursor-pointer"
                   >
                     Conocer más
                   </button>
@@ -264,27 +263,25 @@ const Header: React.FC = () => {
                       </div>
                     </div>
 
-                    {isTyping && (
-                      <div className="flex animate-slide-in-left">
-                        <div className="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg shadow-lg">
-                          <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                            <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                          </div>
+                    <div className="flex animate-slide-in-left" style={{ animationDelay: '1.5s' }}>
+                      <div className="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg shadow-lg">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2 pt-4 border-t border-gray-700">
                     <div className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-500 transition-colors duration-300 focus-within:border-amber-400">
                       Escribe tu pregunta...
                     </div>
-                    <button className="p-2 text-amber-400 hover:bg-gray-800 rounded-lg transition-all duration-300 hover:scale-110">
+                    <button className="p-2 text-amber-400 hover:bg-gray-800 rounded-lg transition-all duration-300 hover:scale-110 cursor-pointer">
                       <Mic className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-amber-400 hover:bg-gray-800 rounded-lg transition-all duration-300 hover:scale-110">
+                    <button className="p-2 text-amber-400 hover:bg-gray-800 rounded-lg transition-all duration-300 hover:scale-110 cursor-pointer">
                       <Send className="w-4 h-4" />
                     </button>
                   </div>
@@ -294,7 +291,6 @@ const Header: React.FC = () => {
           </div>
         </div>
       </section>
-
 
       <section ref={preguntasRef} className="py-20 border-t border-gray-800">
         <div className="container mx-auto px-6">
@@ -312,7 +308,7 @@ const Header: React.FC = () => {
                 <div key={i} className="border border-gray-800 rounded-lg overflow-hidden hover:border-amber-500/30 transition-colors duration-300">
                   <button
                     onClick={() => togglePregunta(i)}
-                    className="w-full flex justify-between items-center p-6 text-left hover:bg-gray-900 transition-colors duration-300"
+                    className="w-full flex justify-between items-center p-6 text-left hover:bg-gray-900 transition-colors duration-300 cursor-pointer"
                   >
                     <span className="font-medium pr-4">{pregunta}</span>
                     <div className={`text-gray-400 flex-shrink-0 transition-all duration-300 ${isOpen ? 'rotate-180 text-amber-400' : ''}`}>
@@ -334,52 +330,91 @@ const Header: React.FC = () => {
         </div>
       </section>
 
-      <style jsx>{`
-        @keyframes slide-in-right {
-          from {
-            opacity: 0;
-            transform: translateX(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes slide-in-left {
-          from {
-            opacity: 0;
-            transform: translateX(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes slide-down {
-          from {
-            opacity: 0;
-            max-height: 0;
-          }
-          to {
-            opacity: 1;
-            max-height: 200px;
-          }
-        }
-        
-        .animate-slide-in-right {
-          animation: slide-in-right 0.5s ease-out forwards;
-        }
-        
-        .animate-slide-in-left {
-          animation: slide-in-left 0.5s ease-out forwards;
-        }
-        
-        .animate-slide-down {
-          animation: slide-down 0.3s ease-out forwards;
-        }
-      `}</style>
+      <style jsx global>{`
+  /* Scrollbar estilizado y minimalista */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent; /* fondo invisible */
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, rgb(112, 77, 15), rgb(104, 80, 10), rgb(88, 53, 13));
+    border-radius: 10px;
+    border: 2px solid transparent; /* espacio alrededor */
+    background-clip: padding-box;
+    box-shadow: inset 0 0 6px rgba(245, 158, 11, 0.3);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, rgb(83, 67, 17), rgb(133, 102, 49), rgb(70, 33, 7));
+    box-shadow: inset 0 0 8px rgba(245, 158, 11, 0.4);
+    transform: scaleY(1.1);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(45deg, #d97706, rgb(97, 77, 18), rgb(90, 63, 17));
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Firefox */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(119, 97, 35) transparent;
+  }
+
+  /* Animaciones */
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      max-height: 200px;
+    }
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.5s ease-out forwards;
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 0.5s ease-out forwards;
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out forwards;
+  }
+`}</style>
+
     </div>
   );
 };
