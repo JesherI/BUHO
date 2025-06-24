@@ -1,10 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface NavbarProps {
   showAuth?: boolean;
   children?: React.ReactNode;
   background?: 'transparent' | 'solid';
+  toggleSidebar?: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({
