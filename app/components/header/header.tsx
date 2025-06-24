@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
-import { MessageCircle, CheckSquare, Mic, Calendar, ChevronDown, Play, ArrowRight, Star, GraduationCap, Sparkles, Brain, Zap, Check, Send } from "lucide-react";
+import { MessageCircle, Mic, ChevronDown, Play, Star, Check, Send, Brain, Zap } from "lucide-react";
 
 const preguntasEjemplo = [
   {
@@ -21,32 +21,64 @@ const preguntasEjemplo = [
   },
 ];
 
+// Hook personalizado para detectar cuando un elemento está visible
+const useIntersectionObserver = (options = {}): [React.RefObject<HTMLDivElement>, boolean] => {
+  const [isVisible, setIsVisible] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true);
+        observer.disconnect(); // Solo animar una vez
+      }
+    }, {
+      threshold: 0.1,
+      rootMargin: '50px',
+      ...options
+    });
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return [elementRef, isVisible];
+};
+
 const Header: React.FC = () => {
   const [activePregunta, setActivePregunta] = useState<number | null>(null);
-  const [isTyping, setIsTyping] = useState(false);
 
-  const preguntasRef = useRef<HTMLDivElement>(null!);
-  const featuresRef = useRef<HTMLDivElement>(null!);
-  const videoRef = useRef<HTMLDivElement>(null!);
+  const [heroRef, heroVisible] = useIntersectionObserver();
+  const [videoSectionRef, videoSectionVisible] = useIntersectionObserver();
+  const [featuresSectionRef, featuresSectionVisible] = useIntersectionObserver();
+  const [faqSectionRef, faqSectionVisible] = useIntersectionObserver();
 
-  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
-    if (ref.current) {
-      ref.current.scrollIntoView({ behavior: "smooth" });
+  const scrollToSection = (sectionName: string) => {
+    let targetElement: HTMLElement | null = null;
+    
+    switch (sectionName) {
+      case 'video':
+        targetElement = videoSectionRef.current;
+        break;
+      case 'features':
+        targetElement = featuresSectionRef.current;
+        break;
+      case 'faq':
+        targetElement = faqSectionRef.current;
+        break;
+    }
+    
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   const togglePregunta = (index: number) => {
     setActivePregunta(activePregunta === index ? null : index);
   };
-
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsTyping(true);
-      setTimeout(() => setIsTyping(false), 2000);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
 
   const features = [
     "Respuestas inteligentes a preguntas académicas",
@@ -64,12 +96,21 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <div className="bg-black text-white min-h-screen">
-      <section className="min-h-screen flex items-center">
+    <div className="min-h-screen text-white relative overflow-hidden">
+      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800 -z-10">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl animate-float"></div>
+          <div className="absolute top-1/4 right-0 w-80 h-80 bg-yellow-500/3 rounded-full blur-3xl animate-float-delayed"></div>
+          <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-amber-400/4 rounded-full blur-3xl animate-float-slow"></div>
+          <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-orange-500/2 rounded-full blur-3xl animate-pulse-slow"></div>
+        </div>
+      </div>
+
+      <section className="min-h-screen flex items-center relative z-10">
         <div className="container mx-auto px-6 py-20">
           <div className="max-w-5xl mx-auto">
 
-            <div className="mb-8">
+            <div className={`mb-8 transition-all duration-1000 ${heroVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`} ref={heroRef}>
               <div className="inline-flex items-center gap-2 border border-amber-500/30 rounded-full px-4 py-2 text-sm backdrop-blur-sm bg-amber-500/5">
                 <Star className="w-4 h-4 text-amber-400" />
                 <span className="text-amber-400">
@@ -81,7 +122,7 @@ const Header: React.FC = () => {
             <div className="grid lg:grid-cols-2 gap-16 items-center">
 
               <div className="space-y-8">
-                <div className="space-y-6">
+                <div className={`space-y-6 transition-all duration-1000 delay-200 ${heroVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`}>
                   <h1 className="text-4xl md:text-6xl font-light leading-tight">
                     Conoce a{" "}
                     <span className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 bg-clip-text text-transparent font-normal animate-pulse">
@@ -95,28 +136,28 @@ const Header: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className={`flex flex-col sm:flex-row gap-4 transition-all duration-1000 delay-400 ${heroVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`}>
                   <button
-                    onClick={() => scrollToSection(videoRef)}
-                    className="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-amber-500/25 transform hover:scale-105"
+                    onClick={() => scrollToSection('video')}
+                    className="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-amber-500/25 transform hover:scale-105 cursor-pointer"
                   >
                     <Play className="w-4 h-4" />
                     Ver Demo
                   </button>
 
                   <button
-                    onClick={() => scrollToSection(featuresRef)}
-                    className="border border-gray-600 hover:border-amber-500/50 hover:bg-gray-900 px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg"
+                    onClick={() => scrollToSection('features')}
+                    className="border border-gray-600 hover:border-amber-500/50 hover:bg-gray-900/50 backdrop-blur-sm px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg cursor-pointer"
                   >
                     Conocer más
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-8">
+              <div className={`space-y-8 transition-all duration-1000 delay-600 ${heroVisible ? 'animate-fade-in-left' : 'opacity-0 translate-x-8'}`}>
                 <div className="grid grid-cols-3 gap-8">
                   {stats.map(({ number, label }, i) => (
-                    <div key={i} className="text-center group cursor-default">
+                    <div key={i} className={`text-center group cursor-default transition-all duration-500 ${heroVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: `${700 + i * 100}ms` }}>
                       <div className="text-3xl font-light text-amber-100 mb-2 group-hover:text-amber-300 transition-colors duration-300 group-hover:scale-110 transform">{number}</div>
                       <div className="text-sm text-gray-400 uppercase tracking-wide group-hover:text-gray-300 transition-colors duration-300">{label}</div>
                     </div>
@@ -127,7 +168,7 @@ const Header: React.FC = () => {
                   <h3 className="text-lg font-medium text-gray-300">¿Qué incluye?</h3>
                   <div className="space-y-3">
                     {features.map((feature, i) => (
-                      <div key={i} className="flex items-center gap-3 group">
+                      <div key={i} className={`flex items-center gap-3 group transition-all duration-500 ${heroVisible ? 'animate-fade-in-right' : 'opacity-0 translate-x-4'}`} style={{ animationDelay: `${1000 + i * 100}ms` }}>
                         <div className="w-5 h-5 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-400/30 transition-colors duration-300">
                           <Check className="w-3 h-3 text-amber-400" />
                         </div>
@@ -142,10 +183,10 @@ const Header: React.FC = () => {
         </div>
       </section>
 
-      <section ref={videoRef} className="py-20 border-t border-gray-800">
+      <section className="py-20 border-t border-gray-800/50 backdrop-blur-sm relative z-10">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
+            <div className={`text-center mb-12 transition-all duration-1000 ${videoSectionVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`} ref={videoSectionRef}>
               <h2 className="text-3xl md:text-4xl font-light mb-4">
                 Mira <span className="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">Buho IA</span> en acción
               </h2>
@@ -154,7 +195,7 @@ const Header: React.FC = () => {
               </p>
             </div>
 
-            <div className="aspect-video bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-amber-200/30 transition-colors duration-300">
+            <div className={`aspect-video bg-gray-900/50 border border-gray-800/50 rounded-xl overflow-hidden hover:border-amber-200/30 transition-all duration-1000 delay-300 backdrop-blur-sm ${videoSectionVisible ? 'animate-fade-in-scale' : 'opacity-0 scale-95'}`}>
               <div className="h-full flex items-center justify-center">
                 <div className="text-center space-y-6">
                   <div className="w-16 h-16 border border-gray-700 rounded-full flex items-center justify-center mx-auto cursor-pointer hover:border-amber-200 hover:bg-amber-400/10 transition-all duration-300 group">
@@ -174,12 +215,12 @@ const Header: React.FC = () => {
         </div>
       </section>
 
-      <section ref={featuresRef} className="py-20 border-t border-gray-800">
+      <section className="py-20 border-t border-gray-800/50 backdrop-blur-sm relative z-10">
         <div className="container mx-auto px-6">
           <div className="max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
 
-              <div className="space-y-8">
+              <div className={`space-y-8 transition-all duration-1000 ${featuresSectionVisible ? 'animate-fade-in-right' : 'opacity-0 translate-x-8'}`} ref={featuresSectionRef}>
                 <div>
                   <h2 className="text-3xl md:text-4xl font-light mb-6">
                     Diseñado para{" "}
@@ -192,48 +233,34 @@ const Header: React.FC = () => {
                 </div>
 
                 <div className="space-y-6">
-                  <div className="flex gap-4 group">
-                    <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-amber-400/30 transition-colors duration-300">
-                      <MessageCircle className="w-3 h-3 text-amber-400" />
+                  {[
+                    { icon: MessageCircle, title: "Conversación natural", desc: "Pregunta como si hablaras con un compañero de clase. Buho IA entiende el contexto y te responde de manera clara." },
+                    { icon: Brain, title: "Aprendizaje personalizado", desc: "Se adapta a tu nivel y estilo de aprendizaje para ofrecerte explicaciones que realmente entiendas." },
+                    { icon: Zap, title: "Siempre disponible", desc: "No importa la hora, Buho IA está listo para ayudarte cuando lo necesites." }
+                  ].map(({ icon: Icon, title, desc }, i) => (
+                    <div key={i} className={`flex gap-4 group transition-all duration-700 ${featuresSectionVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: `${300 + i * 200}ms` }}>
+                      <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-amber-400/30 transition-colors duration-300">
+                        <Icon className="w-3 h-3 text-amber-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium mb-2 group-hover:text-amber-400 transition-colors duration-300">{title}</h3>
+                        <p className="text-gray-400">{desc}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-medium mb-2 group-hover:text-amber-400 transition-colors duration-300">Conversación natural</h3>
-                      <p className="text-gray-400">Pregunta como si hablaras con un compañero de clase. Buho IA entiende el contexto y te responde de manera clara.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 group">
-                    <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-amber-400/30 transition-colors duration-300">
-                      <Brain className="w-3 h-3 text-amber-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-2 group-hover:text-amber-400 transition-colors duration-300">Aprendizaje personalizado</h3>
-                      <p className="text-gray-400">Se adapta a tu nivel y estilo de aprendizaje para ofrecerte explicaciones que realmente entiendas.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 group">
-                    <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-amber-400/30 transition-colors duration-300">
-                      <Zap className="w-3 h-3 text-amber-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-2 group-hover:text-amber-400 transition-colors duration-300">Siempre disponible</h3>
-                      <p className="text-gray-400">No importa la hora, Buho IA está listo para ayudarte cuando lo necesites.</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="relative">
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl p-6 space-y-4 shadow-2xl">
+              <div className={`relative transition-all duration-1000 delay-400 ${featuresSectionVisible ? 'animate-fade-in-left' : 'opacity-0 translate-x-8'}`}>
+                <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 border border-gray-700/50 rounded-xl p-6 space-y-4 shadow-2xl backdrop-blur-sm">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                      <span className="text-black font-bold text-sm">BIA</span>
+                      <span className="text-black font-bold text-sm">B</span>
                     </div>
                     <div>
                       <div className="font-medium">Buho IA</div>
-                      <div className="text-sm text-green-800 flex items-center gap-1">
-                        <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
+                      <div className="text-sm text-green-400 flex items-center gap-1">
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                         En línea
                       </div>
                     </div>
@@ -247,7 +274,7 @@ const Header: React.FC = () => {
                     </div>
 
                     <div className="flex animate-slide-in-left">
-                      <div className="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg max-w-xs shadow-lg">
+                      <div className="bg-gray-800/70 border border-gray-700/50 px-4 py-2 rounded-lg max-w-xs shadow-lg backdrop-blur-sm">
                         ¡Por supuesto! ¿Qué tema específico te gustaría repasar?
                       </div>
                     </div>
@@ -259,32 +286,30 @@ const Header: React.FC = () => {
                     </div>
 
                     <div className="flex animate-slide-in-left" style={{ animationDelay: '1s' }}>
-                      <div className="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg max-w-sm shadow-lg">
+                      <div className="bg-gray-800/70 border border-gray-700/50 px-4 py-2 rounded-lg max-w-sm shadow-lg backdrop-blur-sm">
                         Perfecto. Te explicaré paso a paso cómo resolver ecuaciones cuadráticas...
                       </div>
                     </div>
 
-                    {isTyping && (
-                      <div className="flex animate-slide-in-left">
-                        <div className="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg shadow-lg">
-                          <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                            <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                          </div>
+                    <div className="flex animate-slide-in-left" style={{ animationDelay: '1.5s' }}>
+                      <div className="bg-gray-800/70 border border-gray-700/50 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
                       </div>
-                    )}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-4 border-t border-gray-700">
-                    <div className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-500 transition-colors duration-300 focus-within:border-amber-400">
+                  <div className="flex items-center gap-2 pt-4 border-t border-gray-700/50">
+                    <div className="flex-1 bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-gray-500 transition-colors duration-300 focus-within:border-amber-400 backdrop-blur-sm">
                       Escribe tu pregunta...
                     </div>
-                    <button className="p-2 text-amber-400 hover:bg-gray-800 rounded-lg transition-all duration-300 hover:scale-110">
+                    <button className="p-2 text-amber-400 hover:bg-gray-800/50 rounded-lg transition-all duration-300 hover:scale-110 cursor-pointer">
                       <Mic className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-amber-400 hover:bg-gray-800 rounded-lg transition-all duration-300 hover:scale-110">
+                    <button className="p-2 text-amber-400 hover:bg-gray-800/50 rounded-lg transition-all duration-300 hover:scale-110 cursor-pointer">
                       <Send className="w-4 h-4" />
                     </button>
                   </div>
@@ -295,35 +320,34 @@ const Header: React.FC = () => {
         </div>
       </section>
 
-
-      <section ref={preguntasRef} className="py-20 border-t border-gray-800">
+      <section className="py-20 border-t border-gray-800/50 backdrop-blur-sm relative z-10">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
+          <div className={`text-center mb-16 transition-all duration-1000 ${faqSectionVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`} ref={faqSectionRef}>
             <h2 className="text-3xl md:text-4xl font-light mb-4">
               Preguntas <span className="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">frecuentes</span>
             </h2>
             <p className="text-lg text-gray-400">Resuelve tus dudas sobre Buho IA</p>
           </div>
 
-          <div className="max-w-3xl mx-auto space-y-4">
+          <div className="max-w-3xl mx-auto">
             {preguntasEjemplo.map(({ pregunta, respuesta }, i) => {
               const isOpen = activePregunta === i;
               return (
-                <div key={i} className="border border-gray-800 rounded-lg overflow-hidden hover:border-amber-500/30 transition-colors duration-300">
+                <div key={i} className={`group transition-all duration-700 ${faqSectionVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: `${300 + i * 150}ms` }}>
                   <button
                     onClick={() => togglePregunta(i)}
-                    className="w-full flex justify-between items-center p-6 text-left hover:bg-gray-900 transition-colors duration-300"
+                    className="w-full flex justify-between items-center py-6 text-left border-b border-gray-700/50 hover:border-amber-500/30 transition-all duration-300 cursor-pointer hover:bg-gray-900/20 px-4 rounded-lg"
                   >
-                    <span className="font-medium pr-4">{pregunta}</span>
-                    <div className={`text-gray-400 flex-shrink-0 transition-all duration-300 ${isOpen ? 'rotate-180 text-amber-400' : ''}`}>
+                    <span className="font-medium pr-4 text-gray-200 group-hover:text-amber-300 transition-colors duration-300">{pregunta}</span>
+                    <div className={`text-gray-400 flex-shrink-0 transition-all duration-300 ${isOpen ? 'rotate-180 text-amber-400' : 'group-hover:text-amber-400'}`}>
                       <ChevronDown className="w-5 h-5" />
                     </div>
                   </button>
 
                   {isOpen && (
-                    <div className="border-t border-gray-800 bg-gray-900/50 animate-slide-down">
-                      <div className="p-6">
-                        <p className="text-gray-300 leading-relaxed">{respuesta}</p>
+                    <div className="animate-slide-down border-b border-gray-700/50">
+                      <div className="py-4 px-4 bg-gray-900/10 rounded-b-lg">
+                        <p className="text-gray-300 leading-relaxed pl-2 border-l-2 border-amber-400/30">{respuesta}</p>
                       </div>
                     </div>
                   )}
@@ -334,7 +358,45 @@ const Header: React.FC = () => {
         </div>
       </section>
 
-      <style jsx>{`
+      <style jsx global>{`
+        /* Scrollbar estilizado y minimalista */
+        ::-webkit-scrollbar {
+          width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background: linear-gradient(45deg, rgb(112, 77, 15), rgb(104, 80, 10), rgb(88, 53, 13));
+          border-radius: 10px;
+          border: 2px solid transparent;
+          background-clip: padding-box;
+          box-shadow: inset 0 0 6px rgba(245, 158, 11, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(45deg, rgb(83, 67, 17), rgb(133, 102, 49), rgb(70, 33, 7));
+          box-shadow: inset 0 0 8px rgba(245, 158, 11, 0.4);
+          transform: scaleY(1.1);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+          background: linear-gradient(45deg, #d97706, rgb(97, 77, 18), rgb(90, 63, 17));
+        }
+
+        ::-webkit-scrollbar-corner {
+          background: transparent;
+        }
+
+        /* Firefox */
+        html {
+          scrollbar-width: thin;
+          scrollbar-color: rgb(119, 97, 35) transparent;
+        }
+
+        /* Animaciones existentes */
         @keyframes slide-in-right {
           from {
             opacity: 0;
@@ -345,7 +407,7 @@ const Header: React.FC = () => {
             transform: translateX(0);
           }
         }
-        
+
         @keyframes slide-in-left {
           from {
             opacity: 0;
@@ -356,7 +418,7 @@ const Header: React.FC = () => {
             transform: translateX(0);
           }
         }
-        
+
         @keyframes slide-down {
           from {
             opacity: 0;
@@ -367,18 +429,164 @@ const Header: React.FC = () => {
             max-height: 200px;
           }
         }
-        
+
+        /* Nuevas animaciones para el fondo */
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-20px) rotate(180deg);
+          }
+        }
+
+        @keyframes float-delayed {
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-30px) rotate(-180deg);
+          }
+        }
+
+        @keyframes float-slow {
+          0%, 100% {
+            transform: translateY(0px) scale(1);
+          }
+          50% {
+            transform: translateY(-15px) scale(1.1);
+          }
+        }
+
+        @keyframes pulse-slow {
+          0%, 100% {
+            opacity: 0.1;
+          }
+          50% {
+            opacity: 0.3;
+          }
+        }
+
+        /* NUEVAS ANIMACIONES DE SCROLL */
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fade-in-down {
+          from {
+            opacity: 0;
+            transform: translateY(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fade-in-left {
+          from {
+            opacity: 0;
+            transform: translateX(-40px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes fade-in-right {
+          from {
+            opacity: 0;
+            transform: translateX(40px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes fade-in-scale {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        /* Clases de animación */
         .animate-slide-in-right {
           animation: slide-in-right 0.5s ease-out forwards;
         }
-        
+
         .animate-slide-in-left {
           animation: slide-in-left 0.5s ease-out forwards;
         }
-        
+
         .animate-slide-down {
           animation: slide-down 0.3s ease-out forwards;
         }
+
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+
+        .animate-float-delayed {
+          animation: float-delayed 8s ease-in-out infinite;
+        }
+
+        .animate-float-slow {
+          animation: float-slow 10s ease-in-out infinite;
+        }
+
+        .animate-pulse-slow {
+          animation: pulse-slow 4s ease-in-out infinite;
+        }
+
+        /* NUEVAS CLASES DE ANIMACIÓN DE SCROLL */
+        .animate-fade-in-up {
+          animation: fade-in-up 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in-down {
+          animation: fade-in-down 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in-left {
+          animation: fade-in-left 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in-right {
+          animation: fade-in-right 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in-scale {
+          animation: fade-in-scale 0.8s ease-out forwards;
+        }
+
+        /* Utilidades para delays dinámicos */
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+        .delay-600 { animation-delay: 600ms; }
+        .delay-700 { animation-delay: 700ms; }
+        .delay-800 { animation-delay: 800ms; }
+        .delay-900 { animation-delay: 900ms; }
+        .delay-1000 { animation-delay: 1000ms; }
+        .delay-1100 { animation-delay: 1100ms; }
+        .delay-1200 { animation-delay: 1200ms; }
+        .delay-1300 { animation-delay: 1300ms; }
+        .delay-1400 { animation-delay: 1400ms; }
+        .delay-1500 { animation-delay: 1500ms; }
       `}</style>
     </div>
   );
