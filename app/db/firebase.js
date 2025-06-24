@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { GoogleAuthProvider, FacebookAuthProvider } from "firebase/auth";
 
 // Configuración de Firebase desde variables de entorno
 const firebaseConfig = {
@@ -33,3 +34,6 @@ if (typeof window !== "undefined") {
 
 // Exportar las instancias
 export { app, db, auth, analytics };
+export const googleProvider = new GoogleAuthProvider();
+export const facebookProvider = new FacebookAuthProvider();
+
