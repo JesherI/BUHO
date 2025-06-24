@@ -12,7 +12,7 @@ export default function ChatInterface() {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    (messagesEndRef.current as HTMLDivElement | null)?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -47,7 +47,8 @@ export default function ChatInterface() {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+        {/* Elimina las props no válidas para Sidebar */}
+        <Sidebar />
       </div>
 
       {isSidebarOpen && (
@@ -59,7 +60,7 @@ export default function ChatInterface() {
 
       <div
         className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? "md:ml-64" : "ml-0"
+          isSidebarOpen ? "md:ml-80" : "ml-0"
         }`}
       >
         {/* ✅ Navbar fijo */}
@@ -70,7 +71,9 @@ export default function ChatInterface() {
         </div>
 
         {/* ✅ Agrega padding-top para no tapar el contenido */}
-        <div className="flex-1 flex flex-col min-h-0 pt-16">
+        <div
+          className="flex-1 flex flex-col min-h-0 pt-16 transition-all duration-300"
+        >
           {/* Estado vacío */}
           {messages.length === 0 && (
             <div className="flex-1 flex items-center justify-center">
