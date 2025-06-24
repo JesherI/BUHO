@@ -153,7 +153,7 @@ const Sidebar: React.FC = () => {
                   setIsOpen(true);
                 }
               }}
-              className={`relative p-3 flex flex-col items-center transition-all duration-200 group mb-1 rounded-r-xl mx-1 ${
+              className={`relative p-3 flex flex-col items-center transition-all duration-200 group mb-1 rounded-r-xl mx-1 cursor-pointer ${
                 isActive 
                   ? 'text-yellow-200 bg-yellow-500/8 shadow-lg' 
                   : 'text-gray-400 hover:text-yellow-100 hover:bg-gray-900/50'
@@ -187,12 +187,12 @@ const Sidebar: React.FC = () => {
         isOpen ? 'w-80 opacity-100 visible' : 'w-0 opacity-0 invisible'
       }`}>
         <div className="flex items-center justify-between p-4 border-b border-yellow-200/10 bg-gray-950 min-w-[320px]">
-          <h2 className="text-lg font-normal text-yellow-100">
+          <h2 className="text-lg font-normal text-yellow-100 select-none">
             {activeTab === 'chats' ? 'Chats' : 'Agenda de Tareas'}
           </h2>
           <button
             onClick={() => setIsOpen(false)}
-            className="text-gray-400 hover:text-yellow-200 transition-all duration-200 p-1 rounded-lg hover:bg-gray-900/50"
+            className="text-gray-400 hover:text-yellow-200 transition-all duration-200 p-1 rounded-lg hover:bg-gray-900/50 cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -202,6 +202,7 @@ const Sidebar: React.FC = () => {
           <style jsx>{`
             .custom-scrollbar::-webkit-scrollbar {
               width: 6px;
+              cursor: pointer;
             }
             
             .custom-scrollbar::-webkit-scrollbar-track {
@@ -214,16 +215,22 @@ const Sidebar: React.FC = () => {
               background: rgba(254, 240, 138, 0.3);
               border-radius: 10px;
               border: 1px solid rgba(254, 240, 138, 0.1);
+              cursor: grab;
             }
             
             .custom-scrollbar::-webkit-scrollbar-thumb:hover {
               background: rgba(254, 240, 138, 0.5);
+              cursor: grab;
+            }
+            
+            .custom-scrollbar::-webkit-scrollbar-thumb:active {
+              cursor: grabbing;
             }
           `}</style>
           
           {activeTab === 'chats' && (
             <div className="p-4">
-              <button className="w-full bg-yellow-600/80 hover:bg-yellow-500/80 text-white py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium mb-6 shadow-lg">
+              <button className="w-full bg-yellow-600/80 hover:bg-yellow-500/80 text-white py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium mb-6 shadow-lg cursor-pointer">
                 <PlusCircle size={16} />
                 Nuevo Chat
               </button>
@@ -235,14 +242,14 @@ const Sidebar: React.FC = () => {
                     className="p-4 rounded-xl bg-gray-950/60 hover:bg-gray-900/80 border border-gray-800 hover:border-yellow-200/20 cursor-pointer transition-all duration-200 group"
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-white font-medium text-sm truncate group-hover:text-yellow-100 transition-colors">
+                      <h3 className="text-white font-medium text-sm truncate group-hover:text-yellow-100 transition-colors select-none">
                         {conv.title}
                       </h3>
-                      <span className="text-xs text-yellow-200/60 ml-2 flex-shrink-0 bg-yellow-500/10 px-2 py-0.5 rounded-full">
+                      <span className="text-xs text-yellow-200/60 ml-2 flex-shrink-0 bg-yellow-500/10 px-2 py-0.5 rounded-full select-none">
                         {conv.time}
                       </span>
                     </div>
-                    <p className="text-gray-400 text-xs truncate group-hover:text-gray-300">{conv.preview}</p>
+                    <p className="text-gray-400 text-xs truncate group-hover:text-gray-300 select-none">{conv.preview}</p>
                   </div>
                 ))}
               </div>
@@ -252,7 +259,7 @@ const Sidebar: React.FC = () => {
           {activeTab === 'tasks' && (
             <div className="p-4">
               <div className="mb-6 p-5 bg-gray-950/40 rounded-xl border border-gray-800 shadow-lg">
-                <h3 className="text-yellow-200 font-medium mb-4 flex items-center gap-2">
+                <h3 className="text-yellow-200 font-medium mb-4 flex items-center gap-2 select-none">
                   <PlusCircle size={16} />
                   Nueva Tarea
                 </h3>
@@ -264,14 +271,14 @@ const Sidebar: React.FC = () => {
                     onChange={(e) => setNewTask(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && addTask()}
                     placeholder="¿Qué necesitas hacer?"
-                    className="w-full bg-gray-900/60 border border-gray-700/50 text-white px-4 py-3 rounded-lg focus:border-yellow-400/50 focus:outline-none focus:ring-1 focus:ring-yellow-400/20 text-sm transition-all duration-200"
+                    className="w-full bg-gray-900/60 border border-gray-700/50 text-white px-4 py-3 rounded-lg focus:border-yellow-400/50 focus:outline-none focus:ring-1 focus:ring-yellow-400/20 text-sm transition-all duration-200 cursor-text"
                   />
                   
                   <div className="grid grid-cols-2 gap-3">
                     <select
                       value={newTaskPriority}
                       onChange={(e) => setNewTaskPriority(e.target.value as 'low' | 'medium' | 'high')}
-                      className="bg-gray-900/60 border border-gray-700/50 text-white px-3 py-3 rounded-lg focus:border-yellow-400/50 focus:outline-none focus:ring-1 focus:ring-yellow-400/20 text-sm transition-all duration-200"
+                      className="bg-gray-900/60 border border-gray-700/50 text-white px-3 py-3 rounded-lg focus:border-yellow-400/50 focus:outline-none focus:ring-1 focus:ring-yellow-400/20 text-sm transition-all duration-200 cursor-pointer"
                     >
                       <option value="low">Baja prioridad</option>
                       <option value="medium">Media prioridad</option>
@@ -282,7 +289,7 @@ const Sidebar: React.FC = () => {
                       type="date"
                       value={newTaskDueDate}
                       onChange={(e) => setNewTaskDueDate(e.target.value)}
-                      className="bg-gray-900/60 border border-gray-700/50 text-white px-3 py-3 rounded-lg focus:border-yellow-400/50 focus:outline-none focus:ring-1 focus:ring-yellow-400/20 text-sm transition-all duration-200"
+                      className="bg-gray-900/60 border border-gray-700/50 text-white px-3 py-3 rounded-lg focus:border-yellow-400/50 focus:outline-none focus:ring-1 focus:ring-yellow-400/20 text-sm transition-all duration-200 cursor-pointer"
                     />
                   </div>
                   
@@ -291,13 +298,17 @@ const Sidebar: React.FC = () => {
                     value={newTaskCategory}
                     onChange={(e) => setNewTaskCategory(e.target.value)}
                     placeholder="Categoría (opcional)"
-                    className="w-full bg-gray-900/60 border border-gray-700/50 text-white px-4 py-3 rounded-lg focus:border-yellow-400/50 focus:outline-none focus:ring-1 focus:ring-yellow-400/20 text-sm transition-all duration-200"
+                    className="w-full bg-gray-900/60 border border-gray-700/50 text-white px-4 py-3 rounded-lg focus:border-yellow-400/50 focus:outline-none focus:ring-1 focus:ring-yellow-400/20 text-sm transition-all duration-200 cursor-text"
                   />
                   
                   <button
                     onClick={addTask}
                     disabled={!newTask.trim()}
-                    className="w-full bg-yellow-600/80 hover:bg-yellow-500/80 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg transition-all duration-200 font-medium shadow-lg"
+                    className={`w-full px-4 py-3 rounded-lg transition-all duration-200 font-medium shadow-lg ${
+                      newTask.trim() 
+                        ? 'bg-yellow-600/80 hover:bg-yellow-500/80 text-white cursor-pointer' 
+                        : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                    }`}
                   >
                     Agregar Tarea
                   </button>
@@ -305,15 +316,15 @@ const Sidebar: React.FC = () => {
               </div>
 
               <div className="mb-6 grid grid-cols-3 gap-3 text-xs">
-                <div className="bg-gray-950/40 p-3 rounded-xl text-center border border-gray-800">
+                <div className="bg-gray-950/40 p-3 rounded-xl text-center border border-gray-800 select-none">
                   <div className="text-white font-medium text-lg">{tasks.length}</div>
                   <div className="text-gray-400 font-normal">Total</div>
                 </div>
-                <div className="bg-yellow-500/5 p-3 rounded-xl text-center border border-yellow-500/20">
+                <div className="bg-yellow-500/5 p-3 rounded-xl text-center border border-yellow-500/20 select-none">
                   <div className="text-yellow-200 font-medium text-lg">{pendingTasks}</div>
                   <div className="text-yellow-300/80 font-normal">Pendientes</div>
                 </div>
-                <div className="bg-red-500/5 p-3 rounded-xl text-center border border-red-500/20">
+                <div className="bg-red-500/5 p-3 rounded-xl text-center border border-red-500/20 select-none">
                   <div className="text-red-300 font-medium text-lg">{urgentTasks}</div>
                   <div className="text-red-300/80 font-normal">Urgentes</div>
                 </div>
@@ -332,7 +343,7 @@ const Sidebar: React.FC = () => {
                     <div className="flex items-start gap-3">
                       <button
                         onClick={() => toggleTask(task.id)}
-                        className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-200 mt-0.5 ${
+                        className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-200 mt-0.5 cursor-pointer ${
                           task.completed 
                             ? 'bg-green-500/80 border-green-500' 
                             : `border-gray-500 hover:${getPriorityColor(task.priority).split(' ')[1]}`
@@ -343,7 +354,7 @@ const Sidebar: React.FC = () => {
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className={`text-sm font-normal ${
+                          <span className={`text-sm font-normal select-none ${
                             task.completed ? 'text-gray-400 line-through' : 'text-white'
                           }`}>
                             {task.text}
@@ -353,12 +364,12 @@ const Sidebar: React.FC = () => {
                         
                         <div className="flex items-center gap-3 text-xs text-gray-400">
                           {task.category && (
-                            <span className="bg-gray-800/60 px-2 py-1 rounded-lg font-normal">
+                            <span className="bg-gray-800/60 px-2 py-1 rounded-lg font-normal select-none">
                               {task.category}
                             </span>
                           )}
                           {task.dueDate && (
-                            <span className={`flex items-center gap-1 px-2 py-1 rounded-lg font-normal ${
+                            <span className={`flex items-center gap-1 px-2 py-1 rounded-lg font-normal select-none ${
                               isTaskOverdue(task.dueDate) && !task.completed 
                                 ? 'text-red-300 bg-red-500/10' 
                                 : 'bg-gray-800/40'
@@ -372,7 +383,7 @@ const Sidebar: React.FC = () => {
                       
                       <button
                         onClick={() => deleteTask(task.id)}
-                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400 transition-all duration-200 p-2 rounded-lg hover:bg-red-500/10"
+                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400 transition-all duration-200 p-2 rounded-lg hover:bg-red-500/10 cursor-pointer"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -387,7 +398,7 @@ const Sidebar: React.FC = () => {
 
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/30 z-20 lg:hidden"
+          className="fixed inset-0 bg-black/30 z-20 lg:hidden cursor-pointer"
           onClick={() => setIsOpen(false)}
         />
       )}

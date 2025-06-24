@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { MessageCircle, Mic, ChevronDown, Play, Star, Check, Send, Brain, Zap } from "lucide-react";
 
 const preguntasEjemplo = [
@@ -21,16 +21,58 @@ const preguntasEjemplo = [
   },
 ];
 
+// Hook personalizado para detectar cuando un elemento está visible
+const useIntersectionObserver = (options = {}): [React.RefObject<HTMLDivElement>, boolean] => {
+  const [isVisible, setIsVisible] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true);
+        observer.disconnect(); // Solo animar una vez
+      }
+    }, {
+      threshold: 0.1,
+      rootMargin: '50px',
+      ...options
+    });
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return [elementRef, isVisible];
+};
+
 const Header: React.FC = () => {
   const [activePregunta, setActivePregunta] = useState<number | null>(null);
 
-  const preguntasRef = useRef<HTMLDivElement>(null!);
-  const featuresRef = useRef<HTMLDivElement>(null!);
-  const videoRef = useRef<HTMLDivElement>(null!);
+  const [heroRef, heroVisible] = useIntersectionObserver();
+  const [videoSectionRef, videoSectionVisible] = useIntersectionObserver();
+  const [featuresSectionRef, featuresSectionVisible] = useIntersectionObserver();
+  const [faqSectionRef, faqSectionVisible] = useIntersectionObserver();
 
-  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
-    if (ref.current) {
-      ref.current.scrollIntoView({ behavior: "smooth" });
+  const scrollToSection = (sectionName: string) => {
+    let targetElement: HTMLElement | null = null;
+    
+    switch (sectionName) {
+      case 'video':
+        targetElement = videoSectionRef.current;
+        break;
+      case 'features':
+        targetElement = featuresSectionRef.current;
+        break;
+      case 'faq':
+        targetElement = faqSectionRef.current;
+        break;
+    }
+    
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -68,7 +110,7 @@ const Header: React.FC = () => {
         <div className="container mx-auto px-6 py-20">
           <div className="max-w-5xl mx-auto">
 
-            <div className="mb-8">
+            <div className={`mb-8 transition-all duration-1000 ${heroVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`} ref={heroRef}>
               <div className="inline-flex items-center gap-2 border border-amber-500/30 rounded-full px-4 py-2 text-sm backdrop-blur-sm bg-amber-500/5">
                 <Star className="w-4 h-4 text-amber-400" />
                 <span className="text-amber-400">
@@ -80,7 +122,7 @@ const Header: React.FC = () => {
             <div className="grid lg:grid-cols-2 gap-16 items-center">
 
               <div className="space-y-8">
-                <div className="space-y-6">
+                <div className={`space-y-6 transition-all duration-1000 delay-200 ${heroVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`}>
                   <h1 className="text-4xl md:text-6xl font-light leading-tight">
                     Conoce a{" "}
                     <span className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 bg-clip-text text-transparent font-normal animate-pulse">
@@ -94,9 +136,9 @@ const Header: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className={`flex flex-col sm:flex-row gap-4 transition-all duration-1000 delay-400 ${heroVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`}>
                   <button
-                    onClick={() => scrollToSection(videoRef)}
+                    onClick={() => scrollToSection('video')}
                     className="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-amber-500/25 transform hover:scale-105 cursor-pointer"
                   >
                     <Play className="w-4 h-4" />
@@ -104,7 +146,7 @@ const Header: React.FC = () => {
                   </button>
 
                   <button
-                    onClick={() => scrollToSection(featuresRef)}
+                    onClick={() => scrollToSection('features')}
                     className="border border-gray-600 hover:border-amber-500/50 hover:bg-gray-900/50 backdrop-blur-sm px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg cursor-pointer"
                   >
                     Conocer más
@@ -112,10 +154,10 @@ const Header: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-8">
+              <div className={`space-y-8 transition-all duration-1000 delay-600 ${heroVisible ? 'animate-fade-in-left' : 'opacity-0 translate-x-8'}`}>
                 <div className="grid grid-cols-3 gap-8">
                   {stats.map(({ number, label }, i) => (
-                    <div key={i} className="text-center group cursor-default">
+                    <div key={i} className={`text-center group cursor-default transition-all duration-500 ${heroVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: `${700 + i * 100}ms` }}>
                       <div className="text-3xl font-light text-amber-100 mb-2 group-hover:text-amber-300 transition-colors duration-300 group-hover:scale-110 transform">{number}</div>
                       <div className="text-sm text-gray-400 uppercase tracking-wide group-hover:text-gray-300 transition-colors duration-300">{label}</div>
                     </div>
@@ -126,7 +168,7 @@ const Header: React.FC = () => {
                   <h3 className="text-lg font-medium text-gray-300">¿Qué incluye?</h3>
                   <div className="space-y-3">
                     {features.map((feature, i) => (
-                      <div key={i} className="flex items-center gap-3 group">
+                      <div key={i} className={`flex items-center gap-3 group transition-all duration-500 ${heroVisible ? 'animate-fade-in-right' : 'opacity-0 translate-x-4'}`} style={{ animationDelay: `${1000 + i * 100}ms` }}>
                         <div className="w-5 h-5 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-400/30 transition-colors duration-300">
                           <Check className="w-3 h-3 text-amber-400" />
                         </div>
@@ -141,10 +183,10 @@ const Header: React.FC = () => {
         </div>
       </section>
 
-      <section ref={videoRef} className="py-20 border-t border-gray-800/50 backdrop-blur-sm relative z-10">
+      <section className="py-20 border-t border-gray-800/50 backdrop-blur-sm relative z-10">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
+            <div className={`text-center mb-12 transition-all duration-1000 ${videoSectionVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`} ref={videoSectionRef}>
               <h2 className="text-3xl md:text-4xl font-light mb-4">
                 Mira <span className="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">Buho IA</span> en acción
               </h2>
@@ -153,7 +195,7 @@ const Header: React.FC = () => {
               </p>
             </div>
 
-            <div className="aspect-video bg-gray-900/50 border border-gray-800/50 rounded-xl overflow-hidden hover:border-amber-200/30 transition-colors duration-300 backdrop-blur-sm">
+            <div className={`aspect-video bg-gray-900/50 border border-gray-800/50 rounded-xl overflow-hidden hover:border-amber-200/30 transition-all duration-1000 delay-300 backdrop-blur-sm ${videoSectionVisible ? 'animate-fade-in-scale' : 'opacity-0 scale-95'}`}>
               <div className="h-full flex items-center justify-center">
                 <div className="text-center space-y-6">
                   <div className="w-16 h-16 border border-gray-700 rounded-full flex items-center justify-center mx-auto cursor-pointer hover:border-amber-200 hover:bg-amber-400/10 transition-all duration-300 group">
@@ -173,12 +215,12 @@ const Header: React.FC = () => {
         </div>
       </section>
 
-      <section ref={featuresRef} className="py-20 border-t border-gray-800/50 backdrop-blur-sm relative z-10">
+      <section className="py-20 border-t border-gray-800/50 backdrop-blur-sm relative z-10">
         <div className="container mx-auto px-6">
           <div className="max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
 
-              <div className="space-y-8">
+              <div className={`space-y-8 transition-all duration-1000 ${featuresSectionVisible ? 'animate-fade-in-right' : 'opacity-0 translate-x-8'}`} ref={featuresSectionRef}>
                 <div>
                   <h2 className="text-3xl md:text-4xl font-light mb-6">
                     Diseñado para{" "}
@@ -191,39 +233,25 @@ const Header: React.FC = () => {
                 </div>
 
                 <div className="space-y-6">
-                  <div className="flex gap-4 group">
-                    <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-amber-400/30 transition-colors duration-300">
-                      <MessageCircle className="w-3 h-3 text-amber-400" />
+                  {[
+                    { icon: MessageCircle, title: "Conversación natural", desc: "Pregunta como si hablaras con un compañero de clase. Buho IA entiende el contexto y te responde de manera clara." },
+                    { icon: Brain, title: "Aprendizaje personalizado", desc: "Se adapta a tu nivel y estilo de aprendizaje para ofrecerte explicaciones que realmente entiendas." },
+                    { icon: Zap, title: "Siempre disponible", desc: "No importa la hora, Buho IA está listo para ayudarte cuando lo necesites." }
+                  ].map(({ icon: Icon, title, desc }, i) => (
+                    <div key={i} className={`flex gap-4 group transition-all duration-700 ${featuresSectionVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: `${300 + i * 200}ms` }}>
+                      <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-amber-400/30 transition-colors duration-300">
+                        <Icon className="w-3 h-3 text-amber-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium mb-2 group-hover:text-amber-400 transition-colors duration-300">{title}</h3>
+                        <p className="text-gray-400">{desc}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-medium mb-2 group-hover:text-amber-400 transition-colors duration-300">Conversación natural</h3>
-                      <p className="text-gray-400">Pregunta como si hablaras con un compañero de clase. Buho IA entiende el contexto y te responde de manera clara.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 group">
-                    <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-amber-400/30 transition-colors duration-300">
-                      <Brain className="w-3 h-3 text-amber-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-2 group-hover:text-amber-400 transition-colors duration-300">Aprendizaje personalizado</h3>
-                      <p className="text-gray-400">Se adapta a tu nivel y estilo de aprendizaje para ofrecerte explicaciones que realmente entiendas.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 group">
-                    <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-amber-400/30 transition-colors duration-300">
-                      <Zap className="w-3 h-3 text-amber-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-2 group-hover:text-amber-400 transition-colors duration-300">Siempre disponible</h3>
-                      <p className="text-gray-400">No importa la hora, Buho IA está listo para ayudarte cuando lo necesites.</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="relative">
+              <div className={`relative transition-all duration-1000 delay-400 ${featuresSectionVisible ? 'animate-fade-in-left' : 'opacity-0 translate-x-8'}`}>
                 <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 border border-gray-700/50 rounded-xl p-6 space-y-4 shadow-2xl backdrop-blur-sm">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
@@ -292,9 +320,9 @@ const Header: React.FC = () => {
         </div>
       </section>
 
-      <section ref={preguntasRef} className="py-20 border-t border-gray-800/50 backdrop-blur-sm relative z-10">
+      <section className="py-20 border-t border-gray-800/50 backdrop-blur-sm relative z-10">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
+          <div className={`text-center mb-16 transition-all duration-1000 ${faqSectionVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`} ref={faqSectionRef}>
             <h2 className="text-3xl md:text-4xl font-light mb-4">
               Preguntas <span className="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">frecuentes</span>
             </h2>
@@ -305,7 +333,7 @@ const Header: React.FC = () => {
             {preguntasEjemplo.map(({ pregunta, respuesta }, i) => {
               const isOpen = activePregunta === i;
               return (
-                <div key={i} className="group">
+                <div key={i} className={`group transition-all duration-700 ${faqSectionVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: `${300 + i * 150}ms` }}>
                   <button
                     onClick={() => togglePregunta(i)}
                     className="w-full flex justify-between items-center py-6 text-left border-b border-gray-700/50 hover:border-amber-500/30 transition-all duration-300 cursor-pointer hover:bg-gray-900/20 px-4 rounded-lg"
@@ -439,6 +467,63 @@ const Header: React.FC = () => {
           }
         }
 
+        /* NUEVAS ANIMACIONES DE SCROLL */
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fade-in-down {
+          from {
+            opacity: 0;
+            transform: translateY(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fade-in-left {
+          from {
+            opacity: 0;
+            transform: translateX(-40px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes fade-in-right {
+          from {
+            opacity: 0;
+            transform: translateX(40px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes fade-in-scale {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        /* Clases de animación */
         .animate-slide-in-right {
           animation: slide-in-right 0.5s ease-out forwards;
         }
@@ -466,6 +551,42 @@ const Header: React.FC = () => {
         .animate-pulse-slow {
           animation: pulse-slow 4s ease-in-out infinite;
         }
+
+        /* NUEVAS CLASES DE ANIMACIÓN DE SCROLL */
+        .animate-fade-in-up {
+          animation: fade-in-up 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in-down {
+          animation: fade-in-down 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in-left {
+          animation: fade-in-left 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in-right {
+          animation: fade-in-right 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in-scale {
+          animation: fade-in-scale 0.8s ease-out forwards;
+        }
+
+        /* Utilidades para delays dinámicos */
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+        .delay-600 { animation-delay: 600ms; }
+        .delay-700 { animation-delay: 700ms; }
+        .delay-800 { animation-delay: 800ms; }
+        .delay-900 { animation-delay: 900ms; }
+        .delay-1000 { animation-delay: 1000ms; }
+        .delay-1100 { animation-delay: 1100ms; }
+        .delay-1200 { animation-delay: 1200ms; }
+        .delay-1300 { animation-delay: 1300ms; }
+        .delay-1400 { animation-delay: 1400ms; }
+        .delay-1500 { animation-delay: 1500ms; }
       `}</style>
     </div>
   );

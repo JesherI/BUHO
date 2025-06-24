@@ -19,7 +19,7 @@ export default function ChatInterface() {
 
   return (
     <>
-      <Navbar showAuth={false}>
+      <Navbar showAuth={false} background="solid">
         <Sidebar />
         <ProfileMenu />
       </Navbar>
