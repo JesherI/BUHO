@@ -6,7 +6,7 @@ import ProfileMenu from "../components/profileMenu/profileMenu";
 import Navbar from "../components/navbar/navbar";
 
 export default function ChatInterface() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<{ text: string; sender: string }[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const messagesEndRef = useRef(null);
@@ -157,9 +157,10 @@ export default function ChatInterface() {
                         minHeight: "44px",
                       }}
                       onInput={(e) => {
-                        e.target.style.height = "auto";
-                        e.target.style.height =
-                          Math.min(e.target.scrollHeight, 128) + "px";
+                        const target = e.target as HTMLTextAreaElement;
+                        target.style.height = "auto";
+                        target.style.height =
+                          Math.min(target.scrollHeight, 128) + "px";
                       }}
                     />
                   </div>
