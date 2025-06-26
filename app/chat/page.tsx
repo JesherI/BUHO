@@ -8,8 +8,8 @@ import Navbar from "../components/navbar/navbar";
 export default function ChatInterface() {
   const [messages, setMessages] = useState<{ text: string; sender: string }[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const messagesEndRef = useRef(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const scrollToBottom = () => {
     (messagesEndRef.current as HTMLDivElement | null)?.scrollIntoView({ behavior: "smooth" });
@@ -43,12 +43,11 @@ export default function ChatInterface() {
     <div className="flex h-screen bg-gray-900 text-white overflow-hidden relative">
       {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full z-30 transition-transform duration-300 ease-in-out ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed left-0 top-0 h-full z-30 transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* Elimina las props no válidas para Sidebar */}
-        <Sidebar />
+        <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       </div>
 
       {isSidebarOpen && (
@@ -59,9 +58,8 @@ export default function ChatInterface() {
       )}
 
       <div
-        className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? "md:ml-80" : "ml-0"
-        }`}
+        className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${isSidebarOpen ? "md:ml-80" : "ml-0"
+          }`}
       >
         {/* ✅ Navbar fijo */}
         <div className="fixed top-0 left-0 w-full z-40">
@@ -99,7 +97,11 @@ export default function ChatInterface() {
 
           {/* Contenedor de mensajes con scroll */}
           {messages.length > 0 && (
-            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+            <div className={`flex flex-col flex-1 transition-all duration-500 ease-in-out transform {isSidebarOpen
+                ? "md:ml-80 md:scale-[0.97] md:translate-x-2"
+                : "scale-100 translate-x-0"
+              }`}
+            >
               <div className="w-full max-w-3xl mx-auto px-4 py-4 space-y-6">
                 {messages.map((msg, index) => (
                   <div key={index} className="w-full">

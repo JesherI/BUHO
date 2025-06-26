@@ -18,13 +18,18 @@ interface Conversation {
 }
 
 interface SidebarItem {
-  id: string;
+  id: 'toggle' | 'chats' | 'tasks'; // puedes extender si agregas más
   icon: React.ComponentType<{ size?: number; className?: string }>;
   label: string;
   count?: number;
 }
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   React.useEffect(() => {
     const link = document.createElement('link');
     link.href = 'https://fonts.cdnfonts.com/css/champagne-limousines';
@@ -37,7 +42,6 @@ const Sidebar: React.FC = () => {
       document.head.removeChild(link);
     };
   }, []);
-  const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'chats' | 'tasks'>('chats');
   const [tasks, setTasks] = useState<Task[]>([
     { 
@@ -132,8 +136,9 @@ const Sidebar: React.FC = () => {
   const sidebarItems: SidebarItem[] = [
     { id: 'toggle', icon: Menu, label: 'Menu' },
     { id: 'chats', icon: MessageCircle, label: 'Chats', count: conversations.length },
-    { id: 'tasks', icon: CheckSquare, label: 'Tareas', count: pendingTasks }
+    { id: 'tasks', icon: CheckSquare, label: 'Tareas', count: pendingTasks },
   ];
+  
 
   return (
     <>
