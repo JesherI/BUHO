@@ -18,7 +18,7 @@ interface Conversation {
 }
 
 interface SidebarItem {
-  id: 'toggle' | 'chats' | 'tasks'; // puedes extender si agregas más
+  id: 'toggle' | 'chats' | 'tasks'; 
   icon: React.ComponentType<{ size?: number; className?: string }>;
   label: string;
   count?: number;
@@ -32,8 +32,6 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   React.useEffect(() => {
     const link = document.createElement('link');
-    link.href = 'https://fonts.cdnfonts.com/css/champagne-limousines';
-    link.rel = 'stylesheet';
     document.head.appendChild(link);
     
     document.body.style.fontFamily = "'Champagne & Limousines', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
