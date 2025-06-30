@@ -1,10 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import { User, LogOut, Camera, Shield, FileText, ChevronRight, ExternalLink } from "lucide-react";
+import { signOut } from "firebase/auth";
+import { auth } from "../../db/firebase";
+import { useRouter } from "next/navigation";
 
-const ProfileMenu: React.FC = () => {
+interface ProfileMenuProps {
+  onProfileClick: () => void;
+}
+
+const ProfileMenu: React.FC<ProfileMenuProps> = ({ onProfileClick }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -27,11 +35,17 @@ const ProfileMenu: React.FC = () => {
     setActiveSection(activeSection === section ? null : section);
   };
 
-  const menuItems = {
-    profile: [
-      { icon: Camera, label: "Cambiar foto", action: () => console.log("Cambiar foto") },
-    ],
+  const handleProfileClick = () => {
+    onProfileClick();
+    setIsOpen(false);
+  };
 
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/log-in");
+  };
+
+  const menuItems = {
     legal: [
       { icon: FileText, label: "Términos de uso", action: () => window.open('/terms', '_blank') },
       { icon: Shield, label: "Política de privacidad", action: () => window.open('/privacy', '_blank') },
@@ -81,32 +95,15 @@ const ProfileMenu: React.FC = () => {
           <div className="max-h-56 sm:max-h-64 overflow-y-auto">
             <div>
               <button
-                onClick={() => handleSectionClick('profile')}
+                onClick={handleProfileClick}
                 className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors group cursor-pointer"
               >
                 <div className="flex items-center space-x-3">
                   <User className="w-5 h-5 text-amber-300 group-hover:text-amber-400 group-hover:-translate-y-0.5 transition-transform duration-200" />
                   <span className="font-medium text-white text-sm group-hover:text-amber-100">Mi Perfil</span>
                 </div>
-                <ChevronRight
-                  className={`w-4 h-4 text-gray-400 transition-transform duration-300 group-hover:text-amber-400 ${activeSection === 'profile' ? 'rotate-90 text-amber-400' : ''}`}
-                />
+                <ChevronRight className="w-4 h-4 text-gray-400 transition-transform duration-300 group-hover:text-amber-400" />
               </button>
-
-              {activeSection === 'profile' && (
-                <div className="bg-gray-900/30 border-t border-gray-800/50">
-                  {menuItems.profile.map((item, index) => (
-                    <button
-                      key={index}
-                      onClick={item.action}
-                      className="w-full flex items-center space-x-3 px-8 py-2.5 hover:bg-white/5 transition-colors text-left group cursor-pointer"
-                    >
-                      <item.icon className="w-4 h-4 text-gray-300 group-hover:text-amber-400" />
-                      <span className="text-gray-300 text-sm group-hover:text-white">{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
             <div>
@@ -141,19 +138,17 @@ const ProfileMenu: React.FC = () => {
                 </div>
               )}
             </div>
-
           </div>
 
           <div className="border-t border-gray-800/50">
             <button
-              onClick={() => console.log("Cerrar sesión")}
+              onClick={handleLogout}
               className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-red-600/10 transition-colors group cursor-pointer"
             >
               <LogOut className="w-5 h-5 text-red-400 group-hover:text-red-300" />
               <span className="font-medium text-red-400 text-sm group-hover:text-red-300">Cerrar Sesión</span>
             </button>
           </div>
-
         </div>
       )}
     </div>

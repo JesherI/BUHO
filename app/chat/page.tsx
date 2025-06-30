@@ -1,15 +1,40 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../db/firebase"; // Ajusta la ruta si es diferente
+
 import Sidebar from "../components/sidebar/sidebar";
 import ProfileMenu from "../components/profileMenu/profileMenu";
 import Navbar from "../components/navbar/navbar";
+import ProfileCard from "../profile/page";
 
 export default function ChatInterface() {
+  const router = useRouter();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const messagesEndRef = useRef(null);
+  const [showProfileCard, setShowProfileCard] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const openProfileCard = () => setShowProfileCard(true);
+  const closeProfileCard = () => setShowProfileCard(false);
+
+  // Protección de ruta: verifica usuario autenticado
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // No autenticado, redirige a login
+        router.push("/log-in");
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   const scrollToBottom = () => {
     (messagesEndRef.current as HTMLDivElement | null)?.scrollIntoView({ behavior: "smooth" });
@@ -39,15 +64,21 @@ export default function ChatInterface() {
     }, 1000);
   };
 
+  if (loading) {
+    return (
+      <div className="h-screen flex justify-center items-center text-white bg-gray-900">
+        <p>Cargando...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gray-900 text-white overflow-hidden relative">
       {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full z-30 transition-transform duration-300 ease-in-out ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed left-0 top-0 h-full z-30 transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
-        {/* Elimina las props no válidas para Sidebar */}
         <Sidebar />
       </div>
 
@@ -59,21 +90,18 @@ export default function ChatInterface() {
       )}
 
       <div
-        className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? "md:ml-80" : "ml-0"
-        }`}
+        className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${isSidebarOpen ? "md:ml-80" : "ml-0"
+          }`}
       >
-        {/* ✅ Navbar fijo */}
+        {/* Navbar fijo */}
         <div className="fixed top-0 left-0 w-full z-40">
           <Navbar showAuth={false} toggleSidebar={toggleSidebar}>
-            <ProfileMenu />
+            <ProfileMenu onProfileClick={openProfileCard} />
           </Navbar>
         </div>
 
-        {/* ✅ Agrega padding-top para no tapar el contenido */}
-        <div
-          className="flex-1 flex flex-col min-h-0 pt-16 transition-all duration-300"
-        >
+        {/* Agrega padding-top para no tapar el contenido */}
+        <div className="flex-1 flex flex-col min-h-0 pt-16 transition-all duration-300">
           {/* Estado vacío */}
           {messages.length === 0 && (
             <div className="flex-1 flex items-center justify-center">
@@ -212,6 +240,8 @@ export default function ChatInterface() {
           </div>
         </div>
       </div>
+
+      {showProfileCard && <ProfileCard onClose={closeProfileCard} />}
 
       {/* Scrollbar styles */}
       <style jsx>{`
