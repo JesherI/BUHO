@@ -3,27 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  AiOutlineMail,
-  AiOutlineLock,
-  AiOutlineGoogle,
-  AiFillFacebook,
-  AiOutlineArrowLeft,
-} from "react-icons/ai";
-import {
-  auth,
-  db,
-  googleProvider,
-  facebookProvider,
-} from "../../db/firebase";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithRedirect,
-  getRedirectResult,
-  onAuthStateChanged,
-  User,
-} from "firebase/auth";
+import { AiOutlineMail, AiOutlineLock, AiOutlineGoogle, AiFillFacebook, AiOutlineArrowLeft, } from "react-icons/ai";
+import { auth, db, googleProvider, facebookProvider, } from "../../db/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithRedirect, getRedirectResult, onAuthStateChanged, User, } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 
 interface AuthPageProps {

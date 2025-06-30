@@ -22,12 +22,10 @@ export default function ChatInterface() {
   const openProfileCard = () => setShowProfileCard(true);
   const closeProfileCard = () => setShowProfileCard(false);
 
-  // Protección de ruta: verifica usuario autenticado
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        // No autenticado, redirige a login
-        router.push("/log-in");
+        router.push("/header");
       } else {
         setLoading(false);
       }
