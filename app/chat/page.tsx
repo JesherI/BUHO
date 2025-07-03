@@ -11,10 +11,8 @@ import Navbar from "../components/navbar/navbar";
 import ProfileCard from "../profile/page";
 
 export default function ChatInterface() {
-  const router = useRouter();
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<{ text: string; sender: string }[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const [showProfileCard, setShowProfileCard] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -33,6 +31,8 @@ export default function ChatInterface() {
 
     return () => unsubscribe();
   }, [router]);
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const scrollToBottom = () => {
     (messagesEndRef.current as HTMLDivElement | null)?.scrollIntoView({ behavior: "smooth" });
@@ -71,13 +71,12 @@ export default function ChatInterface() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white overflow-hidden relative">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-neutral-900/65 text-white overflow-hidden relative">
       <div
         className={`fixed left-0 top-0 h-full z-30 transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
       >
-        <Sidebar />
+        <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       </div>
 
       {isSidebarOpen && (
@@ -91,7 +90,6 @@ export default function ChatInterface() {
         className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${isSidebarOpen ? "md:ml-80" : "ml-0"
           }`}
       >
-        {/* Navbar fijo */}
         <div className="fixed top-0 left-0 w-full z-40">
           <Navbar showAuth={false} toggleSidebar={toggleSidebar}>
             <ProfileMenu onProfileClick={openProfileCard} />
@@ -101,6 +99,7 @@ export default function ChatInterface() {
         {/* Agrega padding-top para no tapar el contenido */}
         <div className="flex-1 flex flex-col min-h-0 pt-16 transition-all duration-300">
           {/* Estado vacío */}
+
           {messages.length === 0 && (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center space-y-4 max-w-md px-4">
@@ -123,9 +122,12 @@ export default function ChatInterface() {
             </div>
           )}
 
-          {/* Contenedor de mensajes con scroll */}
           {messages.length > 0 && (
-            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+            <div className={`flex flex-col flex-1 transition-all duration-500 ease-in-out transform {isSidebarOpen
+                ? "md:ml-80 md:scale-[0.97] md:translate-x-2"
+                : "scale-100 translate-x-0"
+              }`}
+            >
               <div className="w-full max-w-3xl mx-auto px-4 py-4 space-y-6">
                 {messages.map((msg, index) => (
                   <div key={index} className="w-full">
@@ -160,11 +162,10 @@ export default function ChatInterface() {
             </div>
           )}
 
-          {/* Input de chat */}
-          <div className="flex-shrink-0 w-full border-t border-gray-800 bg-gray-900/95 backdrop-blur-sm">
+          <div className="flex-shrink-0 w-full border-t border-gray-800 bg-neutral-900/65 backdrop-blur-sm">
             <div className="max-w-3xl mx-auto px-4 py-4">
               <div className="relative">
-                <div className="flex items-end gap-2 bg-gray-800 rounded-2xl p-2 shadow-lg border border-gray-700">
+                <div className="flex items-end gap-2 bg-white/10 backdrop-blur-md rounded-2xl p-2 shadow-lg border border-neutral-900/25">
                   <div className="flex-1 min-h-[44px] max-h-32 overflow-y-auto">
                     <textarea
                       className="w-full bg-transparent text-white placeholder-gray-400 resize-none px-3 py-2 focus:outline-none text-sm leading-relaxed"
@@ -183,9 +184,10 @@ export default function ChatInterface() {
                         minHeight: "44px",
                       }}
                       onInput={(e) => {
-                        e.target.style.height = "auto";
-                        e.target.style.height =
-                          Math.min(e.target.scrollHeight, 128) + "px";
+                        const target = e.target as HTMLTextAreaElement;
+                        target.style.height = "auto";
+                        target.style.height =
+                          Math.min(target.scrollHeight, 128) + "px";
                       }}
                     />
                   </div>
@@ -241,7 +243,6 @@ export default function ChatInterface() {
 
       {showProfileCard && <ProfileCard onClose={closeProfileCard} />}
 
-      {/* Scrollbar styles */}
       <style jsx>{`
         ::-webkit-scrollbar {
           width: 6px;

@@ -359,7 +359,6 @@ const Header: React.FC = () => {
       </section>
 
       <style jsx global>{`
-        /* Scrollbar estilizado y minimalista */
         ::-webkit-scrollbar {
           width: 10px;
         }
@@ -396,7 +395,6 @@ const Header: React.FC = () => {
           scrollbar-color: rgb(119, 97, 35) transparent;
         }
 
-        /* Animaciones existentes */
         @keyframes slide-in-right {
           from {
             opacity: 0;
@@ -430,7 +428,6 @@ const Header: React.FC = () => {
           }
         }
 
-        /* Nuevas animaciones para el fondo */
         @keyframes float {
           0%, 100% {
             transform: translateY(0px) rotate(0deg);
@@ -467,7 +464,6 @@ const Header: React.FC = () => {
           }
         }
 
-        /* NUEVAS ANIMACIONES DE SCROLL */
         @keyframes fade-in-up {
           from {
             opacity: 0;
@@ -552,7 +548,6 @@ const Header: React.FC = () => {
           animation: pulse-slow 4s ease-in-out infinite;
         }
 
-        /* NUEVAS CLASES DE ANIMACIÓN DE SCROLL */
         .animate-fade-in-up {
           animation: fade-in-up 0.8s ease-out forwards;
         }
