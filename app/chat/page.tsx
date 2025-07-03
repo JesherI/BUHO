@@ -1,14 +1,37 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../db/firebase"; // Ajusta la ruta si es diferente
+
 import Sidebar from "../components/sidebar/sidebar";
 import ProfileMenu from "../components/profileMenu/profileMenu";
 import Navbar from "../components/navbar/navbar";
+import ProfileCard from "../profile/page";
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<{ text: string; sender: string }[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
+  const [showProfileCard, setShowProfileCard] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const openProfileCard = () => setShowProfileCard(true);
+  const closeProfileCard = () => setShowProfileCard(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push("/header");
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const scrollToBottom = () => {
@@ -39,6 +62,14 @@ export default function ChatInterface() {
     }, 1000);
   };
 
+  if (loading) {
+    return (
+      <div className="h-screen flex justify-center items-center text-white bg-gray-900">
+        <p>Cargando...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-neutral-900/65 text-white overflow-hidden relative">
       <div
@@ -61,13 +92,14 @@ export default function ChatInterface() {
       >
         <div className="fixed top-0 left-0 w-full z-40">
           <Navbar showAuth={false} toggleSidebar={toggleSidebar}>
-            <ProfileMenu />
+            <ProfileMenu onProfileClick={openProfileCard} />
           </Navbar>
         </div>
 
-        <div
-          className="flex-1 flex flex-col min-h-0 pt-16 transition-all duration-300"
-        >
+        {/* Agrega padding-top para no tapar el contenido */}
+        <div className="flex-1 flex flex-col min-h-0 pt-16 transition-all duration-300">
+          {/* Estado vacío */}
+
           {messages.length === 0 && (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center space-y-4 max-w-md px-4">
@@ -208,6 +240,8 @@ export default function ChatInterface() {
           </div>
         </div>
       </div>
+
+      {showProfileCard && <ProfileCard onClose={closeProfileCard} />}
 
       <style jsx>{`
         ::-webkit-scrollbar {
