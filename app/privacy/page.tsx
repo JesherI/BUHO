@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Shield, Eye, Database, Lock, Trash2, Globe, Calendar, Users, ChevronDown, ArrowLeft, Mail, Home } from 'lucide-react';
+import { Shield, Eye, Database, Lock, Trash2, Globe, Calendar, Users, Plus, Minus, ArrowLeft, Mail, Home, Zap } from 'lucide-react';
 
 const PrivacyPolicyPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [navigationContext, setNavigationContext] = useState<'home' | 'profile' | 'direct'>('direct');
 
-  // Detectar de dónde viene el usuario
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const from = urlParams.get('from');
@@ -17,7 +16,6 @@ const PrivacyPolicyPage: React.FC = () => {
     } else if (from === 'home') {
       setNavigationContext('home');
     } else {
-      // Intentar detectar por referrer o historial
       const referrer = document.referrer;
       if (referrer.includes('/chat') || referrer.includes('/profile')) {
         setNavigationContext('profile');
@@ -32,77 +30,90 @@ const PrivacyPolicyPage: React.FC = () => {
       id: 'recopilacion',
       title: 'Información que Recopilamos',
       icon: Database,
+      color: 'gold',
       summary: 'Qué datos personales recolectamos y cómo los obtenemos.',
       content: [
-        'Recopilamos información que nos proporcionas directamente, como cuando creas una cuenta, utilizas nuestros servicios de IA, o te comunicas con nosotros.',
-        'Información de cuenta: nombre, dirección de correo electrónico, y preferencias de configuración.',
-        'Contenido de conversaciones: mensajes, consultas y respuestas generadas por nuestra IA para mejorar el servicio.',
-        'Información técnica: dirección IP, tipo de dispositivo, navegador, y datos de uso de la plataforma.'
+        'Recopilamos información que nos proporcionas directamente cuando creas una cuenta, utilizas nuestros servicios de IA BUHO, o te comunicas con nosotros.',
+        'Información de cuenta: Nombre, dirección de correo electrónico, preferencias de configuración y datos de autenticación vía Google o Facebook.',
+        'Contenido de conversaciones: Mensajes, consultas y respuestas generadas por nuestra IA para mejorar el servicio y entrenar nuestros modelos.',
+        'Información técnica: Dirección IP, tipo de dispositivo, navegador, datos de uso de la plataforma y métricas de rendimiento.',
+        'Datos de Firebase: Utilizamos Firebase Auth para autenticación, Firestore para almacenamiento de datos y Firebase Analytics para métricas de uso.',
+        'Información de proveedores externos: Datos obtenidos cuando te autentificas con Google o Facebook, limitados a información básica de perfil.'
       ]
     },
     {
       id: 'uso',
       title: 'Cómo Utilizamos tu Información',
       icon: Eye,
+      color: 'gold',
       summary: 'Los propósitos para los cuales procesamos tus datos personales.',
       content: [
-        'Proporcionamos y mejoramos nuestros servicios de inteligencia artificial basándose en tus interacciones.',
-        'Personalizamos tu experiencia y optimizamos las respuestas de la IA según tus preferencias.',
-        'Comunicamos contigo sobre actualizaciones del servicio, nuevas funciones y soporte técnico.',
-        'Analizamos patrones de uso para detectar y prevenir actividades fraudulentas o abusivas.',
-        'Cumplimos con obligaciones legales y protegemos los derechos y seguridad de nuestros usuarios.'
+        'Proporcionamos y mejoramos nuestros servicios de inteligencia artificial BUHO basándose en tus interacciones y feedback.',
+        'Personalizamos tu experiencia y optimizamos las respuestas de la IA según tus preferencias y historial de uso.',
+        'Comunicamos contigo sobre actualizaciones del servicio, nuevas funciones y soporte técnico vía correo electrónico.',
+        'Analizamos patrones de uso mediante Firebase Analytics para detectar y prevenir actividades fraudulentas o abusivas.',
+        'Cumplimos con obligaciones legales y protegemos los derechos y seguridad de nuestros usuarios y la plataforma.',
+        'Mantenemos la seguridad de la aplicación mediante reglas de seguridad de Firebase y validación de datos.'
       ]
     },
     {
       id: 'compartir',
       title: 'Compartir Información',
       icon: Globe,
+      color: 'gold',
       summary: 'Cuándo y con quién compartimos tu información personal.',
       content: [
         'No vendemos, alquilamos ni compartimos tu información personal con terceros para fines comerciales.',
-        'Podemos compartir información con proveedores de servicios que nos ayudan a operar la plataforma.',
-        'Divulgaremos información si es requerido por ley o para proteger nuestros derechos legales.',
+        'Compartimos información con proveedores de servicios como Firebase (Google) que nos ayudan a operar la plataforma bajo estrictos acuerdos de confidencialidad.',
+        'Los datos pueden procesarse por servicios de Google (Firebase Auth, Firestore, Analytics) según sus políticas de privacidad.',
+        'Divulgaremos información si es requerido por ley o para proteger nuestros derechos legales y los de nuestros usuarios.',
         'En caso de fusión o adquisición, la información puede transferirse como parte de los activos empresariales.',
-        'Los datos agregados y anónimos pueden utilizarse para investigación y mejora de servicios de IA.'
+        'Los datos agregados y anónimos pueden utilizarse para investigación y mejora de servicios de IA sin identificar usuarios individuales.'
       ]
     },
     {
       id: 'seguridad',
       title: 'Seguridad de Datos',
       icon: Lock,
+      color: 'gold',
       summary: 'Cómo protegemos tu información personal.',
       content: [
-        'Implementamos medidas de seguridad técnicas y organizativas para proteger tu información.',
-        'Utilizamos cifrado SSL/TLS para todas las transmisiones de datos entre tu dispositivo y nuestros servidores.',
-        'El acceso a datos personales está restringido solo al personal autorizado que necesita esta información.',
+        'Implementamos medidas de seguridad técnicas y organizativas robustas para proteger tu información personal.',
+        'Utilizamos cifrado SSL/TLS para todas las transmisiones de datos entre tu dispositivo y nuestros servidores Firebase.',
+        'El acceso a datos personales está restringido mediante reglas de seguridad de Firebase y solo al personal autorizado.',
+        'Implementamos autenticación multifactor y sistemas de validación para proteger las cuentas de usuario.',
         'Realizamos auditorías de seguridad regulares y actualizamos nuestras protecciones continuamente.',
-        'En caso de violación de datos, notificaremos a los usuarios afectados según lo exige la ley.'
+        'En caso de violación de datos, notificaremos a los usuarios afectados según lo exige la ley y las mejores prácticas de seguridad.'
       ]
     },
     {
       id: 'derechos',
       title: 'Tus Derechos',
       icon: Shield,
+      color: 'gold',
       summary: 'Derechos que tienes sobre tu información personal.',
       content: [
-        'Tienes derecho a acceder, corregir o eliminar tu información personal en cualquier momento.',
-        'Puedes solicitar una copia de todos los datos que tenemos sobre ti en formato portable.',
-        'Puedes oponerte al procesamiento de tus datos para ciertos fines, como marketing directo.',
-        'Tienes derecho a la portabilidad de datos para transferir tu información a otro servicio.',
-        'Puedes retirar tu consentimiento en cualquier momento donde el procesamiento se base en consentimiento.'
+        'Tienes derecho a acceder, corregir o eliminar tu información personal almacenada en nuestros sistemas en cualquier momento.',
+        'Puedes solicitar una copia de todos los datos que tenemos sobre ti en formato portable y legible.',
+        'Puedes oponerte al procesamiento de tus datos para ciertos fines, como análisis de uso o marketing directo.',
+        'Tienes derecho a la portabilidad de datos para transferir tu información a otro servicio compatible.',
+        'Puedes retirar tu consentimiento en cualquier momento donde el procesamiento se base en consentimiento.',
+        'Puedes eliminar tu cuenta y todos los datos asociados a través de la configuración de tu perfil o contactándonos directamente.'
       ]
     },
     {
       id: 'retencion',
       title: 'Retención de Datos',
       icon: Trash2,
+      color: 'gold',
       summary: 'Por cuánto tiempo conservamos tu información.',
       content: [
-        'Conservamos tu información personal solo durante el tiempo necesario para los fines descritos.',
-        'Los datos de conversaciones se conservan para mejorar nuestros modelos de IA, pero pueden anonimizarse.',
-        'Puedes solicitar la eliminación de tu cuenta y datos asociados en cualquier momento.',
-        'Algunos datos pueden conservarse por períodos más largos cuando sea requerido por ley.',
-        'Los datos de respaldo se eliminan según nuestro cronograma regular de eliminación segura.'
+        'Conservamos tu información personal solo durante el tiempo necesario para los fines descritos en esta política.',
+        'Los datos de conversaciones se conservan para mejorar nuestros modelos de IA, pero pueden anonimizarse tras 12 meses.',
+        'Los datos de autenticación se mantienen activos mientras tu cuenta esté vigente y se eliminan tras la desactivación.',
+        'Puedes solicitar la eliminación inmediata de tu cuenta y todos los datos asociados en cualquier momento.',
+        'Algunos datos pueden conservarse por períodos más largos cuando sea requerido por ley o para resolver disputas.',
+        'Los datos de respaldo se eliminan según nuestro cronograma regular de eliminación segura cada 90 días.'
       ]
     }
   ];
@@ -114,13 +125,10 @@ const PrivacyPolicyPage: React.FC = () => {
   const handleNavigation = (destination: string) => {
     if (destination === 'back') {
       if (navigationContext === 'profile') {
-        // Volver al perfil/chat
         window.location.href = '/chat?tab=profile';
       } else if (navigationContext === 'home') {
-        // Volver al home
         window.location.href = '/';
       } else {
-        // Fallback: intentar history.back, sino ir al home
         if (window.history.length > 1) {
           window.history.back();
         } else {
@@ -128,7 +136,6 @@ const PrivacyPolicyPage: React.FC = () => {
         }
       }
     } else if (destination === 'terms') {
-      // Ir a términos de uso manteniendo el contexto
       const params = new URLSearchParams();
       params.set('from', navigationContext === 'profile' ? 'profile' : 'home');
       window.location.href = `/terms?${params.toString()}`;
@@ -137,7 +144,6 @@ const PrivacyPolicyPage: React.FC = () => {
     }
   };
 
-  // Función para obtener el texto del botón de navegación
   const getBackButtonText = () => {
     switch (navigationContext) {
       case 'profile':
@@ -150,18 +156,27 @@ const PrivacyPolicyPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900">
-      <div className="relative overflow-hidden bg-gradient-to-b from-slate-900/90 to-transparent">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0iIzM3MzlmZiIgZmlsbC1vcGFjaXR5PSIwLjEiLz4KPC9zdmc+')] opacity-40"></div>
+    <div className="min-h-screen bg-gradient-to-br from-black via-slate-900 to-black">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-amber-400/30 rounded-full animate-pulse"></div>
+        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-amber-400/40 rounded-full animate-pulse delay-1000"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-amber-400/30 rounded-full animate-pulse delay-2000"></div>
+        <div className="absolute top-1/2 right-1/4 w-1 h-1 bg-amber-300/30 rounded-full animate-pulse delay-500"></div>
+        <div className="absolute top-3/4 left-1/2 w-1 h-1 bg-yellow-400/30 rounded-full animate-pulse delay-1500"></div>
+        <div className="absolute bottom-1/3 right-1/2 w-1.5 h-1.5 bg-amber-400/20 rounded-full animate-pulse delay-700"></div>
+      </div>
+
+      <div className="relative overflow-hidden bg-gradient-to-b from-black/90 via-black/50 to-transparent">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0iI2Y5NzMxNiIgZmlsbC1vcGFjaXR5PSIwLjEiLz4KPC9zdmc+')] opacity-30"></div>
         
-        <div className="relative px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex justify-between items-center mb-16">
+        <div className="relative px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-between items-center mb-10">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => handleNavigation('back')}
-                className="group flex items-center space-x-2 text-slate-400 hover:text-white transition-colors duration-200"
+                className="group flex items-center space-x-2 text-slate-400 hover:text-white transition-all duration-300"
               >
-                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
+                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
                 <span className="font-medium">{getBackButtonText()}</span>
               </button>
               
@@ -170,7 +185,7 @@ const PrivacyPolicyPage: React.FC = () => {
                   <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
                   <button
                     onClick={() => handleNavigation('home')}
-                    className="group flex items-center space-x-2 text-slate-500 hover:text-slate-300 transition-colors duration-200"
+                    className="group flex items-center space-x-2 text-slate-500 hover:text-slate-300 transition-all duration-300"
                   >
                     <Home className="w-4 h-4" />
                     <span className="text-sm font-medium">Inicio</span>
@@ -181,25 +196,25 @@ const PrivacyPolicyPage: React.FC = () => {
             
             <button
               onClick={() => handleNavigation('terms')}
-              className="text-slate-400 hover:text-amber-400 transition-colors duration-200 font-medium"
+              className="text-slate-400 hover:text-amber-400 transition-all duration-300 font-medium"
             >
               Términos de Uso
             </button>
           </div>
 
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl sm:text-6xl font-bold text-white mb-6">
+            <h1 className="text-5xl sm:text-6xl font-bold text-white mb-6 leading-tight">
               Política de{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 animate-pulse">
                 Privacidad
               </span>
             </h1>
             
-            <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-              Transparencia total sobre cómo protegemos y gestionamos tu información personal
+            <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Descubre cómo protegemos y gestionamos tu información personal con total transparencia y compromiso
             </p>
             
-            <div className="flex items-center justify-center space-x-6 text-sm text-slate-400">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-400">
               <div className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4" />
                 <span>Actualizado: 26 de Junio, 2025</span>
@@ -215,76 +230,109 @@ const PrivacyPolicyPage: React.FC = () => {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div className="space-y-8">
+        <div className="relative">
+          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-500/50 via-yellow-500/50 to-amber-600/50"></div>
+          
           {sections.map((section, index) => (
-            <div
-              key={section.id}
-              className="group"
-            >
-              <div
-                onClick={() => toggleSection(section.id)}
-                className="cursor-pointer mb-6"
-              >
-                <div className="flex items-start space-x-4 p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-emerald-400/30 transition-all duration-300">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-400/20 to-cyan-400/20 rounded-xl flex items-center justify-center border border-emerald-400/30">
-                      <section.icon className="w-6 h-6 text-emerald-300" />
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors duration-200">
-                      {section.title}
-                    </h3>
-                    <p className="text-slate-400 leading-relaxed">
-                      {section.summary}
-                    </p>
-                  </div>
-                  
-                  <div className="flex-shrink-0">
-                    <ChevronDown
-                      className={`w-5 h-5 text-slate-400 transition-all duration-300 ${
-                        activeSection === section.id ? 'rotate-180 text-emerald-400' : 'group-hover:text-emerald-400'
-                      }`}
-                    />
-                  </div>
-                </div>
+            <div key={section.id} className="relative mb-12">
+              <div className={`absolute left-6 w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                activeSection === section.id 
+                  ? 'border-amber-400 bg-amber-500/30 shadow-lg shadow-amber-500/50' 
+                  : 'border-amber-500/30 bg-amber-500/10'
+              }`}>
+                <div className={`absolute inset-1 rounded-full transition-all duration-300 ${
+                  activeSection === section.id 
+                    ? 'bg-amber-400/60' 
+                    : 'bg-amber-500/20'
+                }`}></div>
               </div>
-
-              {activeSection === section.id && (
-                <div className="mb-8 ml-4 pl-12 border-l-2 border-emerald-400/30">
-                  <div className="space-y-4">
-                    {section.content.map((paragraph: string, pIndex: number) => (
-                      <div key={pIndex} className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
-                        <p className="text-slate-300 leading-relaxed">
-                          {paragraph}
+              
+              <div className="ml-16">
+                <div
+                  onClick={() => toggleSection(section.id)}
+                  className={`cursor-pointer p-6 rounded-2xl border transition-all duration-300 hover:shadow-lg backdrop-blur-sm ${
+                    activeSection === section.id 
+                      ? 'bg-slate-800/60 border-slate-700/50 shadow-xl' 
+                      : 'bg-slate-900/40 border-slate-800/30 hover:bg-slate-800/40 hover:border-slate-700/40'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-12 h-12 rounded-xl border flex items-center justify-center transition-all duration-300 ${
+                        activeSection === section.id 
+                          ? 'border-amber-400/60 bg-amber-500/20' 
+                          : 'border-amber-500/30 bg-amber-500/10'
+                      }`}>
+                        <section.icon className={`w-6 h-6 transition-all duration-300 ${
+                          activeSection === section.id 
+                            ? 'text-amber-400' 
+                            : 'text-amber-500'
+                        }`} />
+                      </div>
+                      <div>
+                        <h3 className={`text-xl font-bold transition-all duration-300 ${
+                          activeSection === section.id 
+                            ? 'text-amber-400' 
+                            : 'text-white'
+                        }`}>
+                          {section.title}
+                        </h3>
+                        <p className="text-slate-400 text-sm mt-1">
+                          {section.summary}
                         </p>
                       </div>
-                    ))}
+                    </div>
+                    
+                    <div className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-300 ${
+                      activeSection === section.id 
+                        ? 'border-amber-400/60 bg-amber-500/20' 
+                        : 'border-slate-600 bg-slate-800/50'
+                    }`}>
+                      {activeSection === section.id ? (
+                        <Minus className="w-4 h-4 text-amber-400" />
+                      ) : (
+                        <Plus className="w-4 h-4 text-slate-400" />
+                      )}
+                    </div>
                   </div>
+
+                  {activeSection === section.id && (
+                    <div className="mt-6 space-y-4 border-t border-slate-700/50 pt-6 animate-in slide-in-from-top-2 duration-300">
+                      {section.content.map((paragraph: string, pIndex: number) => (
+                        <div key={pIndex} className="flex items-start space-x-3 p-4 bg-slate-900/60 rounded-lg border border-slate-800/30 backdrop-blur-sm">
+                          <div className="w-2 h-2 rounded-full mt-2 bg-amber-500/60"></div>
+                          <p className="text-slate-300 leading-relaxed text-sm">
+                            {paragraph}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      <footer className="bg-slate-900/50 border-t border-slate-700/50 mt-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <footer className="bg-gradient-to-t from-black/60 via-slate-900/30 to-transparent border-t border-slate-800/30 backdrop-blur-xl">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <Mail className="w-5 h-5 text-emerald-400" />
-              <span className="text-slate-300">
-                ¿Preguntas sobre privacidad? Contacta: 
-                <a href="mailto:privacy@company.com" className="text-emerald-400 hover:text-emerald-300 ml-1">
+            <div className="inline-flex items-center space-x-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500/20 to-yellow-500/20 rounded-xl flex items-center justify-center border border-amber-500/30 backdrop-blur-sm">
+                <Mail className="w-6 h-6 text-amber-400" />
+              </div>
+              <div className="text-left">
+                <p className="text-white font-semibold">¿Preguntas sobre privacidad?</p>
+                <a href="mailto:privacy@uttlosmejoresb.com" className="text-amber-400 hover:text-amber-300 transition-colors text-sm">
                   privacy@uttlosmejoresb.com
                 </a>
-              </span>
+              </div>
             </div>
             
-            <div className="text-sm text-slate-500">
-              Esta política de privacidad está diseñada para ser clara y transparente. 
-              Si tienes alguna duda, no dudes en contactarnos.
+            <div className="text-slate-400 max-w-2xl mx-auto leading-relaxed">
+              Esta política de privacidad está diseñada para ser clara y transparente sobre cómo BUHO IA maneja tu información. 
+              Si tienes alguna duda sobre Firebase, autenticación social o nuestros servicios, no dudes en contactarnos.
             </div>
           </div>
         </div>
