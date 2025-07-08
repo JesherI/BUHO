@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../db/firebase"; // Ajusta la ruta si es diferente
+import { auth } from "../db/firebase";
 
 import Sidebar from "../components/sidebar/sidebar";
 import ProfileMenu from "../components/profileMenu/profileMenu";
@@ -11,6 +11,7 @@ import Navbar from "../components/navbar/navbar";
 import ProfileCard from "../profile/page";
 
 export default function ChatInterface() {
+  const router = useRouter();
   const [messages, setMessages] = useState<{ text: string; sender: string }[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
