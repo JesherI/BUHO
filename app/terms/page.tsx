@@ -193,7 +193,7 @@ const TermsOfUsePage: React.FC = () => {
               <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
               <div className="flex items-center space-x-2">
                 <Users className="w-4 h-4" />
-                <span>Versión 2.1</span>
+                <span>Versión 2.8</span>
               </div>
             </div>
           </div>
