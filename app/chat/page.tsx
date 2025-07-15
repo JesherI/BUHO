@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../db/firebase"; // Ajusta la ruta si es diferente
-
+import { auth } from "../db/firebase";
 import Sidebar from "../components/sidebar/sidebar";
 import ProfileMenu from "../components/profileMenu/profileMenu";
 import Navbar from "../components/navbar/navbar";
@@ -13,26 +12,11 @@ import ProfileCard from "../profile/page";
 export default function ChatInterface() {
   const [messages, setMessages] = useState<{ text: string; sender: string }[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const messagesEndRef = useRef(null);
-  const [showProfileCard, setShowProfileCard] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const openProfileCard = () => setShowProfileCard(true);
-  const closeProfileCard = () => setShowProfileCard(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.push("/header");
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [loading, setLoading] = useState(true); // <--- NUEVO estado
+  const messagesEndRef = useRef(null);
+  const router = useRouter();
 
   const scrollToBottom = () => {
     (messagesEndRef.current as HTMLDivElement | null)?.scrollIntoView({ behavior: "smooth" });
@@ -62,10 +46,25 @@ export default function ChatInterface() {
     }, 1000);
   };
 
+  const handleProfileClick = () => {
+    setShowProfile(true);
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push("/log-in");
+      } else {
+        setLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
   if (loading) {
     return (
-      <div className="h-screen flex justify-center items-center text-white bg-gray-900">
-        <p>Cargando...</p>
+      <div className="flex items-center justify-center h-screen bg-neutral-900 text-white">
+        <p className="text-gray-300">Cargando...</p>
       </div>
     );
   }
@@ -92,14 +91,11 @@ export default function ChatInterface() {
       >
         <div className="fixed top-0 left-0 w-full z-40">
           <Navbar showAuth={false} toggleSidebar={toggleSidebar}>
-            <ProfileMenu onProfileClick={openProfileCard} />
+            <ProfileMenu onProfileClick={handleProfileClick} />
           </Navbar>
         </div>
 
-        {/* Agrega padding-top para no tapar el contenido */}
         <div className="flex-1 flex flex-col min-h-0 pt-16 transition-all duration-300">
-          {/* Estado vacío */}
-
           {messages.length === 0 && (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center space-y-4 max-w-md px-4">
@@ -123,10 +119,11 @@ export default function ChatInterface() {
           )}
 
           {messages.length > 0 && (
-            <div className={`flex flex-col flex-1 transition-all duration-500 ease-in-out transform {isSidebarOpen
-                ? "md:ml-80 md:scale-[0.97] md:translate-x-2"
-                : "scale-100 translate-x-0"
-              }`}
+            <div
+              className={`flex flex-col flex-1 transition-all duration-500 ease-in-out transform ${isSidebarOpen
+                  ? "md:ml-80 md:scale-[0.97] md:translate-x-2"
+                  : "scale-100 translate-x-0"
+                }`}
             >
               <div className="w-full max-w-3xl mx-auto px-4 py-4 space-y-6">
                 {messages.map((msg, index) => (
@@ -191,44 +188,19 @@ export default function ChatInterface() {
                       }}
                     />
                   </div>
-
                   <div className="flex gap-1">
                     <button
                       className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-700 hover:bg-gray-600 text-amber-400 hover:text-amber-300 transition-all duration-200 group"
                       aria-label="Grabar mensaje de voz"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 1.75a2.75 2.75 0 00-2.75 2.75v6a2.75 2.75 0 105.5 0v-6A2.75 2.75 0 0012 1.75z" />
-                        <path
-                          fillRule="evenodd"
-                          d="M5 10.5a7 7 0 0014 0 .75.75 0 011.5 0 8.5 8.5 0 01-7.25 8.42v2.08h2a.75.75 0 010 1.5h-5a.75.75 0 010-1.5h2v-2.08A8.5 8.5 0 013.5 10.5a.75.75 0 011.5 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
 
+                    </button>
                     <button
                       onClick={sendMessage}
                       disabled={!newMessage.trim()}
                       className="w-9 h-9 flex items-center justify-center rounded-xl bg-amber-600 hover:bg-amber-500 disabled:bg-gray-700 disabled:text-gray-500 text-white transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                        />
-                      </svg>
+
                     </button>
                   </div>
                 </div>
@@ -241,23 +213,7 @@ export default function ChatInterface() {
         </div>
       </div>
 
-      {showProfileCard && <ProfileCard onClose={closeProfileCard} />}
-
-      <style jsx>{`
-        ::-webkit-scrollbar {
-          width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #374151;
-          border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: #4b5563;
-        }
-      `}</style>
+      {showProfile && <ProfileCard key={Date.now()} onClose={() => setShowProfile(false)} />}
     </div>
   );
 }
