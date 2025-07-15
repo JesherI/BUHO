@@ -1,11 +1,33 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AiOutlineMail, AiOutlineLock, AiOutlineGoogle, AiFillFacebook, AiOutlineArrowLeft, } from "react-icons/ai";
-import { auth, db, googleProvider, facebookProvider } from "../../db/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, onAuthStateChanged, User, } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import {
+  AiOutlineMail,
+  AiOutlineLock,
+  AiOutlineGoogle,
+  AiFillFacebook,
+  AiOutlineArrowLeft,
+} from "react-icons/ai";
+import {
+  auth,
+  db,
+  googleProvider,
+  facebookProvider,
+} from "../../db/firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  onAuthStateChanged,
+  User,
+} from "firebase/auth";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 interface AuthPageProps {
   mode: "login" | "signup";
@@ -15,7 +37,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
   const isLogin = mode === "login";
@@ -35,15 +56,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
   };
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    // Redirige si ya hay un usuario autenticado
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        if (window.location.pathname !== "/log-in" && window.location.pathname !== "/sign-up") {
-          router.push("/chat");
-        }
+        router.replace("/chat");
       }
     });
     return () => unsubscribe();
@@ -52,18 +68,23 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (mode === "signup") {
-        if (password !== confirm) {
-          alert("Passwords do not match");
-          return;
-        }
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await handleUserProfile(userCredential.user);
-        router.push("/chat");
-      } else {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        router.push("/chat");
+      if (!isLogin && password !== confirm) {
+        alert("Passwords do not match");
+        return;
       }
+
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        await handleUserProfile(userCredential.user);
+      }
+
+      router.push("/chat");
     } catch (error: any) {
       alert(error.message);
     }
@@ -88,8 +109,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
       alert(error.message);
     }
   };
-
-  if (!mounted) return null;
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-12 relative overflow-hidden">
