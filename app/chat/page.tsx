@@ -10,7 +10,7 @@ import Navbar from "../components/navbar/navbar";
 import ProfileCard from "../profile/page";
 
 export default function ChatInterface() {
-  const router = useRouter();
+  // Eliminamos la declaración duplicada de router
   const [messages, setMessages] = useState<{ text: string; sender: string }[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
