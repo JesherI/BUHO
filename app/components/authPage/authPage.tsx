@@ -1,12 +1,33 @@
 "use client";
-
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AiOutlineMail, AiOutlineLock, AiOutlineGoogle, AiFillFacebook, AiOutlineArrowLeft, } from "react-icons/ai";
-import { auth, db, googleProvider, facebookProvider, } from "../../db/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithRedirect, getRedirectResult, onAuthStateChanged, User, } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import {
+  AiOutlineMail,
+  AiOutlineLock,
+  AiOutlineGoogle,
+  AiFillFacebook,
+  AiOutlineArrowLeft,
+} from "react-icons/ai";
+import {
+  auth,
+  db,
+  googleProvider,
+  facebookProvider,
+} from "../../db/firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  onAuthStateChanged,
+  User,
+} from "firebase/auth";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 interface AuthPageProps {
   mode: "login" | "signup";
@@ -16,108 +37,78 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
   const isLogin = mode === "login";
 
   const handleUserProfile = async (user: User) => {
-    try {
-      const userRef = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef);
-
-      if (!snap.exists()) {
-        await setDoc(userRef, {
-          username: user.displayName || "",
-          email: user.email || "",
-          photoURL: user.photoURL || "",
-          academicContext: "",
-          createdAt: serverTimestamp(),
-        });
-      }
-    } catch (error) {
-      console.error("Error creando perfil en Firestore:", error);
-      alert("Error creando perfil, intenta de nuevo.");
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) {
+      await setDoc(userRef, {
+        username: "",
+        email: user.email || "",
+        photoBase64: "",
+        academicContext: "",
+        createdAt: serverTimestamp(),
+      });
     }
   };
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const checkRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          await handleUserProfile(result.user);
-          router.push("/chat");
-          return;
-        }
-      } catch (error) {
-        console.error("Error en redirect result:", error);
-      }
-    };
-
-    checkRedirectResult();
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    // Redirige si ya hay un usuario autenticado
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        router.push("/chat");
+        router.replace("/chat");
       }
     });
-
     return () => unsubscribe();
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (mode === "signup") {
-        if (password !== confirm) {
-          alert("Passwords do not match");
-          return;
-        }
+      if (!isLogin && password !== confirm) {
+        alert("Passwords do not match");
+        return;
+      }
+
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
         const userCredential = await createUserWithEmailAndPassword(
           auth,
           email,
           password
         );
         await handleUserProfile(userCredential.user);
-        router.push("/chat");
-      } else {
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-        await handleUserProfile(userCredential.user);
-        router.push("/chat");
       }
+
+      router.push("/chat");
     } catch (error: any) {
       alert(error.message);
     }
   };
 
-  const handleGoogleRedirect = async () => {
+  const handleGooglePopup = async () => {
     try {
-      await signInWithRedirect(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      await handleUserProfile(result.user);
+      router.push("/chat");
     } catch (error: any) {
       alert(error.message);
     }
   };
 
-  const handleFacebookRedirect = async () => {
+  const handleFacebookPopup = async () => {
     try {
-      await signInWithRedirect(auth, facebookProvider);
+      const result = await signInWithPopup(auth, facebookProvider);
+      await handleUserProfile(result.user);
+      router.push("/chat");
     } catch (error: any) {
       alert(error.message);
     }
   };
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-12 relative overflow-hidden">
@@ -133,10 +124,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
 
       <div className="flex flex-col md:flex-row w-full max-w-5xl rounded-2xl overflow-hidden relative z-10 min-h-[600px] shadow-xl">
         {/* Card dorada */}
-        <div className="w-full md:w-1/2 relative overflow-hidden bg-gradient-to-br from-amber-300 via-amber-400 to-amber-200 bg-opacity-70 flex flex-col justify-center items-center p-8 md:p-12 min-h-[600px] text-white">
+        <div className="w-full md:w-1/2 relative overflow-hidden bg-gradient-to-br from-amber-300 via-amber-400 to-amber-200 flex flex-col justify-center items-center p-8 md:p-12 min-h-[600px] text-white">
           <div className="z-10 w-full max-w-xs text-center md:text-right flex flex-col md:flex-row justify-center md:justify-end gap-6 md:gap-12">
             {!isLogin ? (
-              <h2 className="text-3xl text-gray-900 cursor-default">Sign Up</h2>
+              <h2 className="text-3xl text-gray-900">Sign Up</h2>
             ) : (
               <Link
                 href="/sign-up"
@@ -146,7 +137,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
               </Link>
             )}
             {isLogin ? (
-              <h2 className="text-3xl text-gray-900 cursor-default">Login</h2>
+              <h2 className="text-3xl text-gray-900">Login</h2>
             ) : (
               <Link
                 href="/log-in"
@@ -155,10 +146,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
                 Login
               </Link>
             )}
-          </div>
-          <div className="absolute inset-0 z-0">
-            <div className="absolute w-[150%] h-[150%] bg-amber-400 rounded-full blur-3xl top-[-30%] left-[-30%] opacity-15"></div>
-            <div className="absolute w-[120%] h-[120%] bg-amber-300 rotate-45 blur-2xl bottom-[-20%] right-[-20%] opacity-10"></div>
           </div>
         </div>
 
@@ -187,7 +174,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                autoComplete="email"
               />
             </div>
 
@@ -202,7 +188,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoComplete={isLogin ? "current-password" : "new-password"}
               />
             </div>
 
@@ -218,7 +203,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                   required
-                  autoComplete="new-password"
                 />
               </div>
             )}
@@ -226,7 +210,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
             <div className="flex justify-end text-sm mt-4 mb-6">
               <button
                 type="submit"
-                className="bg-amber-400 text-gray-800 py-2 px-6 rounded-full shadow-lg hover:bg-amber-200 transition"
+                className="bg-amber-400 text-black py-2 px-6 rounded-full shadow-lg hover:bg-amber-300 transition"
               >
                 {isLogin ? "LOGIN" : "SIGN UP"}
               </button>
@@ -237,17 +221,15 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
             <p className="text-gray-400 mb-4">Or continue with</p>
             <div className="flex justify-center gap-6">
               <button
-                onClick={handleGoogleRedirect}
+                onClick={handleGooglePopup}
                 className="flex items-center gap-2 text-white hover:text-amber-200 transition"
-                aria-label="Sign in with Google"
               >
                 <AiOutlineGoogle size={24} className="text-red-400" />
                 Google
               </button>
               <button
-                onClick={handleFacebookRedirect}
+                onClick={handleFacebookPopup}
                 className="flex items-center gap-2 text-white hover:text-amber-200 transition"
-                aria-label="Sign in with Facebook"
               >
                 <AiFillFacebook size={24} className="text-blue-400" />
                 Facebook
