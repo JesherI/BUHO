@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Scale, Cpu, Shield, AlertTriangle, Calendar, Users, ChevronDown, ArrowLeft, FileText, HelpCircle, Home } from 'lucide-react';
+import { Scale, Cpu, Shield, AlertTriangle, Calendar, Users, ArrowLeft, Home, Plus, Minus, Mail } from 'lucide-react';
 
 const TermsOfUsePage: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [navigationContext, setNavigationContext] = useState<'home' | 'profile' | 'direct'>('direct');
 
-  // Detectar de dónde viene el usuario
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const from = urlParams.get('from');
@@ -17,7 +16,6 @@ const TermsOfUsePage: React.FC = () => {
     } else if (from === 'home') {
       setNavigationContext('home');
     } else {
-      // Intentar detectar por referrer o historial
       const referrer = document.referrer;
       if (referrer.includes('/chat') || referrer.includes('/profile')) {
         setNavigationContext('profile');
@@ -34,9 +32,12 @@ const TermsOfUsePage: React.FC = () => {
       icon: Scale,
       summary: 'Al usar BUHO IA, aceptas estos términos y condiciones.',
       content: [
-        'Al acceder y utilizar BUHO IA, usted acepta estar sujeto a estos Términos de Uso y todas las leyes y regulaciones aplicables.',
-        'Si no está de acuerdo con alguno de estos términos, tiene prohibido usar o acceder a este sitio y servicio.',
-        'El uso continuado del servicio constituye la aceptación de cualquier modificación a estos términos.'
+        'Al acceder y utilizar BUHO IA, usted acepta estar sujeto a estos Términos de Uso y todas las leyes y regulaciones aplicables, incluyendo el uso de nuestro sistema de autenticación basado en Firebase.',
+        'Nuestro sistema de autenticación maneja el registro de usuarios, inicio de sesión y gestión de sesiones a través de Firebase Auth, incluyendo proveedores de autenticación social como Google y Facebook.',
+        'El sistema utiliza el proyecto Firebase `buho-8aba3` para la gestión de usuarios, almacenamiento de datos en Firestore y análisis de interacciones del usuario.',
+        'Al registrarse o iniciar sesión, acepta el procesamiento de sus datos de autenticación y el uso de cookies para mantener su sesión activa.',
+        'Si no está de acuerdo con alguno de estos términos o con el uso de nuestros servicios de autenticación, tiene prohibido usar o acceder a este sitio y servicio.',
+        'El uso continuado del servicio constituye la aceptación de cualquier modificación a estos términos y a nuestras políticas de autenticación.'
       ]
     },
     {
@@ -95,13 +96,10 @@ const TermsOfUsePage: React.FC = () => {
   const handleNavigation = (destination: string) => {
     if (destination === 'back') {
       if (navigationContext === 'profile') {
-        // Volver al perfil/chat
         window.location.href = '/chat?tab=profile';
       } else if (navigationContext === 'home') {
-        // Volver al home
         window.location.href = '/';
       } else {
-        // Fallback: intentar history.back, sino ir al home
         if (window.history.length > 1) {
           window.history.back();
         } else {
@@ -109,7 +107,6 @@ const TermsOfUsePage: React.FC = () => {
         }
       }
     } else if (destination === 'privacy') {
-      // Ir a política de privacidad manteniendo el contexto
       const params = new URLSearchParams();
       params.set('from', navigationContext === 'profile' ? 'profile' : 'home');
       window.location.href = `/privacy?${params.toString()}`;
@@ -118,7 +115,6 @@ const TermsOfUsePage: React.FC = () => {
     }
   };
 
-  // Función para obtener el texto del botón de navegación
   const getBackButtonText = () => {
     switch (navigationContext) {
       case 'profile':
@@ -131,18 +127,27 @@ const TermsOfUsePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-orange-900">
-      <div className="relative overflow-hidden bg-gradient-to-b from-slate-900/90 to-transparent">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0iI2Y5NzMxNiIgZmlsbC1vcGFjaXR5PSIwLjEiLz4KPC9zdmc+')] opacity-40"></div>
+    <div className="min-h-screen bg-gradient-to-br from-black via-slate-900 to-black">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-amber-400/30 rounded-full animate-pulse"></div>
+        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-amber-400/40 rounded-full animate-pulse delay-1000"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-amber-400/30 rounded-full animate-pulse delay-2000"></div>
+        <div className="absolute top-1/2 right-1/4 w-1 h-1 bg-amber-300/30 rounded-full animate-pulse delay-500"></div>
+        <div className="absolute top-3/4 left-1/2 w-1 h-1 bg-yellow-400/30 rounded-full animate-pulse delay-1500"></div>
+        <div className="absolute bottom-1/3 right-1/2 w-1.5 h-1.5 bg-amber-400/20 rounded-full animate-pulse delay-700"></div>
+      </div>
+
+      <div className="relative overflow-hidden bg-gradient-to-b from-black/90 via-black/50 to-transparent">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0iI2Y5NzMxNiIgZmlsbC1vcGFjaXR5PSIwLjEiLz4KPC9zdmc+')] opacity-30"></div>
         
-        <div className="relative px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex justify-between items-center mb-16">
+        <div className="relative px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-between items-center mb-10">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => handleNavigation('back')}
-                className="group flex items-center space-x-2 text-slate-400 hover:text-white transition-colors duration-200"
+                className="group flex items-center space-x-2 text-slate-400 hover:text-white transition-all duration-300"
               >
-                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
+                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
                 <span className="font-medium">{getBackButtonText()}</span>
               </button>
               
@@ -151,7 +156,7 @@ const TermsOfUsePage: React.FC = () => {
                   <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
                   <button
                     onClick={() => handleNavigation('home')}
-                    className="group flex items-center space-x-2 text-slate-500 hover:text-slate-300 transition-colors duration-200"
+                    className="group flex items-center space-x-2 text-slate-500 hover:text-slate-300 transition-all duration-300"
                   >
                     <Home className="w-4 h-4" />
                     <span className="text-sm font-medium">Inicio</span>
@@ -162,25 +167,25 @@ const TermsOfUsePage: React.FC = () => {
             
             <button
               onClick={() => handleNavigation('privacy')}
-              className="text-slate-400 hover:text-emerald-400 transition-colors duration-200 font-medium"
+              className="text-slate-400 hover:text-amber-400 transition-all duration-300 font-medium"
             >
               Política de Privacidad
             </button>
           </div>
 
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl sm:text-6xl font-bold text-white mb-6">
+            <h1 className="text-5xl sm:text-6xl font-bold text-white mb-6 leading-tight">
               Términos de{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 animate-pulse">
                 Uso
               </span>
             </h1>
             
-            <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
               Condiciones claras y justas que rigen el uso de nuestros servicios de inteligencia artificial
             </p>
             
-            <div className="flex items-center justify-center space-x-6 text-sm text-slate-400">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-400">
               <div className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4" />
                 <span>Actualizado: 26 de Junio, 2025</span>
@@ -188,7 +193,7 @@ const TermsOfUsePage: React.FC = () => {
               <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
               <div className="flex items-center space-x-2">
                 <Users className="w-4 h-4" />
-                <span>Versión 2.1</span>
+                <span>Versión 2.8</span>
               </div>
             </div>
           </div>
@@ -196,63 +201,113 @@ const TermsOfUsePage: React.FC = () => {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div className="space-y-8">
+        <div className="relative">
+          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-500/50 via-yellow-500/50 to-amber-600/50"></div>
+          
           {sections.map((section, index) => (
-            <div
-              key={section.id}
-              className="group"
-            >
-              <div
-                onClick={() => toggleSection(section.id)}
-                className="cursor-pointer mb-6"
-              >
-                <div className="flex items-start space-x-4 p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-amber-400/30 transition-all duration-300">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-xl flex items-center justify-center border border-amber-400/30">
-                      <section.icon className="w-6 h-6 text-amber-300" />
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-amber-300 transition-colors duration-200">
-                      {section.title}
-                    </h3>
-                    <p className="text-slate-400 leading-relaxed">
-                      {section.summary}
-                    </p>
-                  </div>
-                  
-                  <div className="flex-shrink-0">
-                    <ChevronDown
-                      className={`w-5 h-5 text-slate-400 transition-all duration-300 ${
-                        activeSection === section.id ? 'rotate-180 text-amber-400' : 'group-hover:text-amber-400'
-                      }`}
-                    />
-                  </div>
-                </div>
+            <div key={section.id} className="relative mb-12">
+              <div className={`absolute left-6 w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                activeSection === section.id 
+                  ? 'border-amber-400 bg-amber-500/30 shadow-lg shadow-amber-500/50' 
+                  : 'border-amber-500/30 bg-amber-500/10'
+              }`}>
+                <div className={`absolute inset-1 rounded-full transition-all duration-300 ${
+                  activeSection === section.id 
+                    ? 'bg-amber-400/60' 
+                    : 'bg-amber-500/20'
+                }`}></div>
               </div>
-
-              {activeSection === section.id && (
-                <div className="mb-8 ml-4 pl-12 border-l-2 border-amber-400/30">
-                  <div className="space-y-4">
-                    {section.content.map((paragraph, pIndex) => (
-                      <div key={pIndex} className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
-                        <p className="text-slate-300 leading-relaxed">
-                          {paragraph}
+              
+              <div className="ml-16">
+                <div
+                  onClick={() => toggleSection(section.id)}
+                  className={`cursor-pointer p-6 rounded-2xl border transition-all duration-300 hover:shadow-lg backdrop-blur-sm ${
+                    activeSection === section.id 
+                      ? 'bg-slate-800/60 border-slate-700/50 shadow-xl' 
+                      : 'bg-slate-900/40 border-slate-800/30 hover:bg-slate-800/40 hover:border-slate-700/40'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-12 h-12 rounded-xl border flex items-center justify-center transition-all duration-300 ${
+                        activeSection === section.id 
+                          ? 'border-amber-400/60 bg-amber-500/20' 
+                          : 'border-amber-500/30 bg-amber-500/10'
+                      }`}>
+                        <section.icon className={`w-6 h-6 transition-all duration-300 ${
+                          activeSection === section.id 
+                            ? 'text-amber-400' 
+                            : 'text-amber-500'
+                        }`} />
+                      </div>
+                      <div>
+                        <h3 className={`text-xl font-bold transition-all duration-300 ${
+                          activeSection === section.id 
+                            ? 'text-amber-400' 
+                            : 'text-white'
+                        }`}>
+                          {section.title}
+                        </h3>
+                        <p className="text-slate-400 text-sm mt-1">
+                          {section.summary}
                         </p>
                       </div>
-                    ))}
+                    </div>
+                    
+                    <div className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-300 ${
+                      activeSection === section.id 
+                        ? 'border-amber-400/60 bg-amber-500/20' 
+                        : 'border-slate-600 bg-slate-800/50'
+                    }`}>
+                      {activeSection === section.id ? (
+                        <Minus className="w-4 h-4 text-amber-400" />
+                      ) : (
+                        <Plus className="w-4 h-4 text-slate-400" />
+                      )}
+                    </div>
                   </div>
+
+                  {activeSection === section.id && (
+                    <div className="mt-6 space-y-4 border-t border-slate-700/50 pt-6 animate-in slide-in-from-top-2 duration-300">
+                      {section.content.map((paragraph: string, pIndex: number) => (
+                        <div key={pIndex} className="flex items-start space-x-3 p-4 bg-slate-900/60 rounded-lg border border-slate-800/30 backdrop-blur-sm">
+                          <div className="w-2 h-2 rounded-full mt-2 bg-amber-500/60"></div>
+                          <p className="text-slate-300 leading-relaxed text-sm">
+                            {paragraph}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           ))}
         </div>
-
-        
-            
-        
       </div>
+
+      <footer className="bg-gradient-to-t from-black/60 via-slate-900/30 to-transparent border-t border-slate-800/30 backdrop-blur-xl">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <div className="inline-flex items-center space-x-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500/20 to-yellow-500/20 rounded-xl flex items-center justify-center border border-amber-500/30 backdrop-blur-sm">
+                <Mail className="w-6 h-6 text-amber-400" />
+              </div>
+              <div className="text-left">
+                <p className="text-white font-semibold">¿Preguntas sobre términos?</p>
+                <a href="mailto:legal@uttlosmejoresb.com" className="text-amber-400 hover:text-amber-300 transition-colors text-sm">
+                  legal@uttlosmejoresb.com
+                </a>
+              </div>
+            </div>
+            
+            <div className="text-slate-400 max-w-2xl mx-auto leading-relaxed">
+              Estos términos de uso están diseñados para ser claros y transparentes sobre cómo BUHO IA opera. 
+              Si tienes alguna duda sobre Firebase, autenticación o nuestros servicios, no dudes en contactarnos.
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
