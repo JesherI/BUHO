@@ -33,14 +33,14 @@ const Footer: React.FC = () => {
           <ul>
             <li><a href="#" className="hover:underline">Privacidad</a></li>
             <li><a href="#" className="hover:underline">Términos</a></li>
-            <li><a href="#" className="hover:underline">Cookies</a></li>
+            <li><a href="/cookies" className="hover:underline hover:text-amber-400">Cookies</a></li>
           </ul>
         </div>
         <div>
           <h3 className="text-white font-semibold mb-2">Idioma</h3>
           <ul>
             <li><a href="#" className="hover:underline">Español</a></li>
-            <li><a href="#" className="hover:underline">Inglés</a></li>
+            <li><a href="" className="hover:underline">Inglés</a></li>
           </ul>
         </div>
       </div>
