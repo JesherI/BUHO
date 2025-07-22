@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 const Footer: React.FC = () => {
   return (
@@ -7,40 +8,34 @@ const Footer: React.FC = () => {
         <div>
           <h3 className="text-white font-semibold mb-2">Búho</h3>
           <ul>
-            <li><a href="#" className="hover:underline">Acerca de</a></li>
-            <li><a href="#" className="hover:underline">Equipo</a></li>
-            <li><a href="#" className="hover:underline">Empleo</a></li>
+            <li><Link href="#" className="hover:underline">Acerca de</Link></li>
           </ul>
         </div>
         <div>
           <h3 className="text-white font-semibold mb-2">Plataforma</h3>
           <ul>
-            <li><a href="#" className="hover:underline">Precios</a></li>
-            <li><a href="#" className="hover:underline">Documentación</a></li>
-            <li><a href="#" className="hover:underline">API</a></li>
+            <li><Link href="#" className="hover:underline">Proximamente</Link></li>
           </ul>
         </div>
         <div>
           <h3 className="text-white font-semibold mb-2">Recursos</h3>
           <ul>
-            <li><a href="#" className="hover:underline">Centro de ayuda</a></li>
-            <li><a href="#" className="hover:underline">Blog</a></li>
-            <li><a href="#" className="hover:underline">Historias</a></li>
+            <li><Link href="/help" className="hover:underline">Centro de ayuda</Link></li>
           </ul>
         </div>
         <div>
           <h3 className="text-white font-semibold mb-2">Legal</h3>
           <ul>
-            <li><a href="#" className="hover:underline">Privacidad</a></li>
-            <li><a href="#" className="hover:underline">Términos</a></li>
-            <li><a href="/cookies" className="hover:underline hover:text-amber-400">Cookies</a></li>
+            <li><Link href="/privacy" className="hover:underline">Privacidad</Link></li>
+            <li><Link href="/terms" className="hover:underline">Términos</Link></li>
+            <li><Link href="/cookies" className="hover:underline">Cookies</Link></li>
           </ul>
         </div>
         <div>
           <h3 className="text-white font-semibold mb-2">Idioma</h3>
           <ul>
-            <li><a href="#" className="hover:underline">Español</a></li>
-            <li><a href="" className="hover:underline">Inglés</a></li>
+            <li><Link href="#" className="hover:underline">Español</Link></li>
+            <li><Link href="#" className="hover:underline">Inglés</Link></li>
           </ul>
         </div>
       </div>
