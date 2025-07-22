@@ -17,7 +17,6 @@ export default function ChatInterface() {
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(true); // <--- NUEVO estado
   const messagesEndRef = useRef(null);
-  const router = useRouter();
 
   const scrollToBottom = () => {
     (messagesEndRef.current as HTMLDivElement | null)?.scrollIntoView({ behavior: "smooth" });

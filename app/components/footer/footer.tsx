@@ -28,7 +28,7 @@ const Footer: React.FC = () => {
           <ul>
             <li><Link href="/privacy" className="hover:underline">Privacidad</Link></li>
             <li><Link href="/terms" className="hover:underline">Términos</Link></li>
-            <li><Link href="#" className="hover:underline">Cookies</Link></li>
+            <li><Link href="/cookies" className="hover:underline">Cookies</Link></li>
           </ul>
         </div>
         <div>

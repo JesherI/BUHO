@@ -2,6 +2,11 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { cookieUtils } from "@/app/utils/cookies";
+import CookieBanner from "../CookieBanner";
+
+
+
 import {
   AiOutlineMail,
   AiOutlineLock,
@@ -37,6 +42,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [rememberMe, setRememberMe] = useState(false); 
   const router = useRouter();
 
   const isLogin = mode === "login";
@@ -46,7 +52,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
     const snap = await getDoc(userRef);
     if (!snap.exists()) {
       await setDoc(userRef, {
-        username: "",
+        username: user.displayName || "",
         email: user.email || "",
         photoBase64: "",
         academicContext: "",
@@ -55,8 +61,28 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
     }
   };
 
+  // FUNCIÓN PARA GUARDAR DATOS EN COOKIES DESPUÉS DEL LOGIN
+  const saveUserToCookies = async (user: User, idToken: string) => {
+    // Solo guardar en cookies si el usuario las aceptó
+    if (cookieUtils.areCookiesAccepted()) {
+      // Guardar token de autenticación
+      cookieUtils.setAuthToken(idToken, rememberMe);
+      
+      // Guardar datos de sesión del usuario
+      cookieUtils.setUserSession({
+        userId: user.uid,
+        username: user.displayName || user.email?.split('@')[0] || 'Usuario',
+        email: user.email || undefined
+      });
+
+      console.log('✅ Datos de usuario guardados en cookies');
+    } else {
+      console.log('ℹ️ Cookies no aceptadas, usando solo Firebase Auth');
+    }
+  };
+
   useEffect(() => {
-    // Redirige si ya hay un usuario autenticado
+    // Verificar autenticación tanto en Firebase como en cookies
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         router.replace("/chat");
@@ -69,23 +95,26 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
     e.preventDefault();
     try {
       if (!isLogin && password !== confirm) {
-        alert("Passwords do not match");
+        alert("Las contraseñas no coinciden");
         return;
       }
 
+      let userCredential;
+      
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
       } else {
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+        userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await handleUserProfile(userCredential.user);
       }
 
+      // OBTENER TOKEN Y GUARDAR EN COOKIES
+      const idToken = await userCredential.user.getIdToken();
+      await saveUserToCookies(userCredential.user, idToken);
+
       router.push("/chat");
     } catch (error: any) {
+      console.error('Error de autenticación:', error);
       alert(error.message);
     }
   };
@@ -94,8 +123,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       await handleUserProfile(result.user);
+      
+      // GUARDAR EN COOKIES
+      const idToken = await result.user.getIdToken();
+      await saveUserToCookies(result.user, idToken);
+      
       router.push("/chat");
     } catch (error: any) {
+      console.error('Error con Google:', error);
       alert(error.message);
     }
   };
@@ -104,14 +139,35 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
     try {
       const result = await signInWithPopup(auth, facebookProvider);
       await handleUserProfile(result.user);
+      
+      // GUARDAR EN COOKIES
+      const idToken = await result.user.getIdToken();
+      await saveUserToCookies(result.user, idToken);
+      
       router.push("/chat");
     } catch (error: any) {
+      console.error('Error con Facebook:', error);
       alert(error.message);
     }
   };
 
+  // MANEJAR ACEPTACIÓN DE COOKIES
+  const handleCookiesAccepted = () => {
+    console.log('🍪 Usuario aceptó las cookies desde AuthPage');
+  };
+
+  const handleCookiesRejected = () => {
+    console.log('❌ Usuario rechazó las cookies');
+  };
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-12 relative overflow-hidden">
+      {/*BANNER DE COOKIES */}
+      <CookieBanner 
+        onAccept={handleCookiesAccepted}
+        onReject={handleCookiesRejected}
+      />
+
       <div className="absolute top-6 left-6 z-50">
         <button
           onClick={() => router.push("/")}
@@ -204,6 +260,22 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
                   onChange={(e) => setConfirm(e.target.value)}
                   required
                 />
+              </div>
+            )}
+
+            {/* ✅ CHECKBOX PARA RECORDAR SESIÓN */}
+            {isLogin && (
+              <div className="flex items-center mb-6">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="mr-2 w-4 h-4 text-amber-500 bg-black/30 border-amber-400 rounded focus:ring-amber-500 focus:ring-2"
+                />
+                <label htmlFor="rememberMe" className="text-sm text-gray-400">
+                  Recordar mi sesión (30 días)
+                </label>
               </div>
             )}
 
