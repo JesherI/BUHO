@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../db/firebase";
@@ -10,6 +10,90 @@ import Navbar from "../components/navbar/navbar";
 import ProfileCard from "../profile/page";
 import { sendToGemini } from "../lib/gemini";
 
+// --- Componente para renderizar Markdown (Corregido) ---
+const MarkdownRenderer = ({ content }: { content: string }) => {
+  const renderInline = (text: string) => {
+    // Manejo de negritas e itálicas
+    const segments = text.split(/(\*\*.*?\*\*|\*.*?\*)/g).filter(Boolean);
+    return segments.map((segment, i) => {
+      if (segment.startsWith('**') && segment.endsWith('**')) {
+        return <strong key={i}>{segment.slice(2, -2)}</strong>;
+      }
+      if (segment.startsWith('*') && segment.endsWith('*')) {
+        return <em key={i}>{segment.slice(1, -1)}</em>;
+      }
+      return <Fragment key={i}>{segment}</Fragment>;
+    });
+  };
+
+  const renderPart = (part: string, index: number) => {
+    if (part.startsWith('```') && part.endsWith('```')) {
+      // Es un bloque de código
+      const code = part.slice(3, -3).trim();
+      return (
+        <pre key={index} className="bg-gray-900 p-3 rounded-lg my-2 overflow-x-auto">
+          <code className="text-white text-sm font-mono">{code}</code>
+        </pre>
+      );
+    }
+    
+    // Es un bloque de texto, procesar línea por línea
+    const lines = part.split('\n');
+    const elements = [];
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i];
+
+      // Unordered list
+      if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) {
+        const listItems = [];
+        while (i < lines.length && (lines[i].trim().startsWith('* ') || lines[i].trim().startsWith('- '))) {
+          listItems.push(lines[i].trim().substring(2));
+          i++;
+        }
+        elements.push(
+          <ul key={`ul-${index}-${i}`} className="list-disc list-inside my-2 pl-4">
+            {listItems.map((item, itemIndex) => (
+              <li key={itemIndex}>{renderInline(item)}</li>
+            ))}
+          </ul>
+        );
+        continue;
+      }
+      
+      // Ordered list
+      if (line.match(/^\d+\.\s/)) {
+        const listItems = [];
+        while (i < lines.length && lines[i].match(/^\d+\.\s/)) {
+          listItems.push(lines[i].replace(/^\d+\.\s/, ''));
+          i++;
+        }
+        elements.push(
+          <ol key={`ol-${index}-${i}`} className="list-decimal list-inside my-2 pl-4">
+            {listItems.map((item, itemIndex) => (
+              <li key={itemIndex}>{renderInline(item)}</li>
+            ))}
+          </ol>
+        );
+        continue;
+      }
+
+      // Paragraph
+      if (line.trim()) {
+        elements.push(<p key={`p-${index}-${i}`} className="my-1">{renderInline(line)}</p>);
+      }
+      
+      i++;
+    }
+
+    return <Fragment key={index}>{elements}</Fragment>;
+  };
+
+  const parts = content.split(/(```[\s\S]*?```)/g);
+  return <div>{parts.map(renderPart)}</div>;
+};
+
+
 export default function ChatInterface() {
   const router = useRouter();
   const [messages, setMessages] = useState<{ text: string; sender: string }[]>([]);
@@ -17,10 +101,10 @@ export default function ChatInterface() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(true);
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
-    (messagesEndRef.current as HTMLDivElement | null)?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -106,12 +190,15 @@ export default function ChatInterface() {
               </div>
             </div>
           )}
-
+          
           {messages.length > 0 && (
-            <div className={`flex flex-col flex-1 transition-all duration-500 ease-in-out transform ${isSidebarOpen ? "md:ml-80 md:scale-[0.97] md:translate-x-2" : "scale-100 translate-x-0"}`}>
-              <div className="w-full max-w-3xl mx-auto px-4 py-4 space-y-6">
+            <div 
+              className={`flex-1 w-full px-4 overflow-y-auto transition-all duration-500 ease-in-out transform ${isSidebarOpen ? "md:scale-[0.97] md:translate-x-2" : "scale-100 translate-x-0"}`}
+              style={{ minHeight: 0 }}
+            >
+              <div className="py-4 max-w-3xl mx-auto">
                 {messages.map((msg, index) => (
-                  <div key={index} className="w-full">
+                  <div key={index} className="w-full mb-6">
                     {msg.sender === "user" ? (
                       <div className="flex justify-end">
                         <div className="max-w-[80%] bg-gradient-to-r from-[#f5deb3] via-[#d4af37] to-[#cfae7b] text-black px-4 py-3 rounded-2xl rounded-br-md shadow-md">
@@ -125,21 +212,21 @@ export default function ChatInterface() {
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                           </svg>
                         </div>
-                        <div className="max-w-[80%] bg-gray-800 text-white px-4 py-3 rounded-2xl rounded-tl-md shadow-sm">
-                          <p className="text-sm leading-relaxed">{msg.text}</p>
+                        <div className="max-w-[80%] bg-gray-800 text-white px-4 py-3 rounded-2xl rounded-tl-md shadow-sm text-sm leading-relaxed">
+                          <MarkdownRenderer content={msg.text} />
                         </div>
                       </div>
                     )}
                   </div>
                 ))}
-                <div ref={messagesEndRef} className="h-4" />
+                <div ref={messagesEndRef} />
               </div>
             </div>
           )}
 
           <div className="flex-shrink-0 w-full border-t border-gray-800 bg-neutral-900/65 backdrop-blur-sm">
-            <div className="max-w-3xl mx-auto px-4 py-4">
-              <div className="relative">
+            <div className="w-full px-4 py-4">
+              <div className="relative max-w-3xl mx-auto">
                 <div className="flex items-end gap-2 bg-white/10 backdrop-blur-md rounded-2xl p-2 shadow-lg border border-neutral-900/25">
                   <div className="flex-1 min-h-[44px] max-h-32 overflow-y-auto">
                     <textarea
@@ -154,7 +241,6 @@ export default function ChatInterface() {
                         }
                       }}
                       rows={1}
-                      style={{ height: "auto", minHeight: "44px" }}
                       onInput={(e) => {
                         const target = e.target as HTMLTextAreaElement;
                         target.style.height = "auto";
@@ -163,13 +249,15 @@ export default function ChatInterface() {
                     />
                   </div>
                   <div className="flex gap-1">
-                    <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-700 hover:bg-gray-600 text-amber-400 hover:text-amber-300 transition-all duration-200 group" aria-label="Grabar mensaje de voz"></button>
+                    <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-700 hover:bg-gray-600 text-amber-400 hover:text-amber-300 transition-all duration-200 group" aria-label="Grabar mensaje de voz">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                    </button>
                     <button
                       onClick={sendMessage}
                       disabled={!newMessage.trim()}
                       className="w-9 h-9 flex items-center justify-center rounded-xl bg-amber-600 hover:bg-amber-500 disabled:bg-gray-700 disabled:text-gray-500 text-white transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
                     >
-                      ➤
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
                     </button>
                   </div>
                 </div>
