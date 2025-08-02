@@ -1,20 +1,21 @@
 import React from 'react';
-import { Check, Calendar, Flag, Trash2 } from 'lucide-react';
+import { Check, Calendar, Flag, Trash2, Edit3 } from 'lucide-react';
 import { Task } from './types';
 
 interface TaskItemProps {
   task: Task;
-  toggleTask: (id: number) => void;
-  deleteTask: (id: number) => void;
+  toggleTask: (id: string) => void;
+  onEdit: (task: Task) => void;
+  onDelete: (task: Task) => void;
   getPriorityColor: (priority: 'low' | 'medium' | 'high') => string;
   getPriorityBg: (priority: 'low' | 'medium' | 'high') => string;
   isTaskOverdue: (dueDate?: string) => boolean;
 }
 
-const TaskItem: React.FC<TaskItemProps> = ({ task, toggleTask, deleteTask, getPriorityColor, getPriorityBg, isTaskOverdue }) => {
+const TaskItem: React.FC<TaskItemProps> = ({ task, toggleTask, onEdit, onDelete, getPriorityColor, getPriorityBg, isTaskOverdue }) => {
   return (
     <div
-      className={`p-4 rounded-xl border transition-all duration-200 group ${
+      className={`p-4 mx-1 rounded-xl border transition-all duration-200 group ${
         task.completed 
           ? 'bg-green-500/5 border-green-500/20' 
           : `${getPriorityBg(task.priority)} border-gray-800 hover:border-gray-200/20`
@@ -61,12 +62,20 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, toggleTask, deleteTask, getPr
           </div>
         </div>
         
-        <button
-          onClick={() => deleteTask(task.id)}
-          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400 transition-all duration-200 p-2 rounded-lg hover:bg-red-500/10 cursor-pointer"
-        >
-          <Trash2 size={14} />
-        </button>
+        <div className="flex gap-1">
+          <button
+            onClick={() => onEdit(task)}
+            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-orange-400 transition-all duration-200 p-2 rounded-lg hover:bg-orange-500/10 cursor-pointer"
+          >
+            <Edit3 size={14} />
+          </button>
+          <button
+            onClick={() => onDelete(task)}
+            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400 transition-all duration-200 p-2 rounded-lg hover:bg-red-500/10 cursor-pointer"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
     </div>
   );

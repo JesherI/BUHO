@@ -1,10 +1,12 @@
 export interface Task {
-  id: number;
+  id: string;
   text: string;
   completed: boolean;
   priority: 'low' | 'medium' | 'high';
   dueDate?: string;
   category?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Conversation {

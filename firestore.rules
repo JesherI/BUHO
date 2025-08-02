@@ -2,20 +2,25 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regla para permitir a los usuarios acceder solo a sus propias conversaciones
-    match /conversations/{userId} {
-      // Permitir lectura/escritura solo si el ID del usuario coincide con el ID autenticado
+
+    // Documento del usuario
+    match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      // Permitir acceso a los chats dentro de las conversaciones del usuario
+
+      // Subcolección de chats del usuario
       match /chats/{chatId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
+
+        // Subcolección de mensajes dentro de un chat
+        match /messages/{messageId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
       }
-    }
-    
-    // Regla general para otros documentos (puedes ajustar según necesites)
-    match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2025, 6, 21);
+      
+      // Subcolección de tareas del usuario
+      match /tasks/{taskId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
   }
 }

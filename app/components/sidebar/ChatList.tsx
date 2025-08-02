@@ -39,13 +39,15 @@ const ChatList: React.FC<ChatListProps> = ({ conversations, onNewChat, onSelectC
   
   return (
     <div className="p-4">
-      <button 
-        onClick={handleNewChat}
-        className="w-full bg-gray-600/80 hover:bg-gray-500/80 text-white py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium mb-6 shadow-lg cursor-pointer"
-      >
-        <PlusCircle size={16} />
-        Nuevo Chat
-      </button>
+      <div className="mx-1">
+        <button 
+          onClick={handleNewChat}
+          className="w-full bg-gray-950/60 hover:bg-gray-900/80 text-gray-200 hover:text-white py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium mb-6 border border-gray-800 hover:border-gray-200/20 cursor-pointer"
+        >
+          <PlusCircle size={16} />
+          Nuevo Chat
+        </button>
+      </div>
       
       <div className="space-y-3">
         {conversations.length === 0 ? (
