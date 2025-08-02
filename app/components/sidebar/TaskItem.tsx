@@ -17,7 +17,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, toggleTask, deleteTask, getPr
       className={`p-4 rounded-xl border transition-all duration-200 group ${
         task.completed 
           ? 'bg-green-500/5 border-green-500/20' 
-          : `${getPriorityBg(task.priority)} border-gray-800 hover:border-yellow-200/20`
+          : `${getPriorityBg(task.priority)} border-gray-800 hover:border-gray-200/20`
       } ${isTaskOverdue(task.dueDate) && !task.completed ? 'ring-1 ring-red-500/40' : ''}`}
     >
       <div className="flex items-start gap-3">

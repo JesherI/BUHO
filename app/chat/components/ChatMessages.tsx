@@ -38,7 +38,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isSidebarOpen }) 
                   <div className="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
                     <Image src="/logo.png" alt="Logo" width={32} height={32} priority />
                   </div>
-                  <div className="max-w-[80%] bg-gray-800 text-white px-4 py-3 rounded-2xl rounded-tl-md shadow-sm text-sm leading-relaxed">
+                  <div className="max-w-[80%] bg-black text-white px-4 py-3 rounded-2xl rounded-tl-md shadow-sm text-sm leading-relaxed border border-amber-500">
                     <div className="flex items-center">
                       <span>Generando respuesta</span>
                       <span className="ml-1 inline-flex">
@@ -57,7 +57,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isSidebarOpen }) 
             <div key={index} className="w-full mb-6">
               {msg.sender === "user" ? (
                 <div className="flex justify-end">
-                  <div className="max-w-[80%] bg-gradient-to-r from-[#f5deb3] via-[#d4af37] to-[#cfae7b] text-black px-4 py-3 rounded-2xl rounded-br-md shadow-md">
+                  <div className="max-w-[80%] bg-gradient-to-r from-black via-gray-900 to-black text-white px-4 py-3 rounded-2xl rounded-br-md shadow-md border border-gray-700">
                     <p className="text-sm leading-relaxed font-medium break-words whitespace-pre-wrap">{msg.text}</p>
                   </div>
                 </div>
@@ -66,7 +66,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isSidebarOpen }) 
                   <div className="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
                     <Image src="/logo.png" alt="Logo" width={32} height={32} priority />
                   </div>
-                  <div className="max-w-[80%] bg-gray-800 text-white px-4 py-3 rounded-2xl rounded-tl-md shadow-sm text-sm leading-relaxed overflow-auto">
+                  <div className="max-w-[80%] bg-black text-white px-4 py-3 rounded-2xl rounded-tl-md shadow-sm text-sm leading-relaxed overflow-auto border border-amber-500">
                     <MarkdownRenderer content={msg.text} />
                   </div>
                 </div>

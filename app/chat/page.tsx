@@ -266,7 +266,7 @@ export default function ChatInterface() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-neutral-900 text-white">
+      <div className="flex items-center justify-center h-screen bg-black text-white">
         <div className="text-center">
           <div className="w-16 h-16 mx-auto bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-lg animate-pulse">
             <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -280,7 +280,7 @@ export default function ChatInterface() {
   }
 
   return (
-    <div className="flex h-screen bg-neutral-900/65 text-white overflow-hidden relative">
+    <div className="flex h-screen bg-black text-white overflow-hidden relative">
       <div className={`fixed left-0 top-0 h-full z-30 transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       </div>
@@ -320,7 +320,7 @@ export default function ChatInterface() {
                     ].map((suggestion, index) => (
                       <button
                         key={index}
-                        className="bg-white/10 hover:bg-white/20 text-left px-4 py-3 rounded-xl text-sm text-white transition-colors"
+                        className="bg-black/50 hover:bg-gray-900 text-left px-4 py-3 rounded-xl text-sm text-white transition-colors border border-gray-800"
                         onClick={() => {
                           setNewMessage(suggestion);
                           // Enfocar el textarea después de establecer el mensaje

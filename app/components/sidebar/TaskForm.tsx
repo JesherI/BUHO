@@ -38,14 +38,14 @@ const TaskForm: React.FC<TaskFormProps> = ({
           onChange={(e) => setNewTask(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && addTask()}
           placeholder="¿Qué necesitas hacer?"
-          className="w-full bg-gray-900/60 border border-gray-700/50 text-white px-4 py-3 rounded-lg focus:border-yellow-400/50 focus:outline-none focus:ring-1 focus:ring-yellow-400/20 text-sm transition-all duration-200 cursor-text"
+          className="w-full bg-gray-900/60 border border-gray-700/50 text-white px-4 py-3 rounded-lg focus:border-gray-400/50 focus:outline-none focus:ring-1 focus:ring-gray-400/20 text-sm transition-all duration-200 cursor-text"
         />
         
         <div className="grid grid-cols-2 gap-3">
           <select
             value={newTaskPriority}
             onChange={(e) => setNewTaskPriority(e.target.value as 'low' | 'medium' | 'high')}
-            className="bg-gray-900/60 border border-gray-700/50 text-white px-3 py-3 rounded-lg focus:border-yellow-400/50 focus:outline-none focus:ring-1 focus:ring-yellow-400/20 text-sm transition-all duration-200 cursor-pointer"
+            className="bg-gray-900/60 border border-gray-700/50 text-white px-3 py-3 rounded-lg focus:border-gray-400/50 focus:outline-none focus:ring-1 focus:ring-gray-400/20 text-sm transition-all duration-200 cursor-pointer"
           >
             <option value="low">Baja prioridad</option>
             <option value="medium">Media prioridad</option>
@@ -73,7 +73,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
           disabled={!newTask.trim()}
           className={`w-full px-4 py-3 rounded-lg transition-all duration-200 font-medium shadow-lg ${
             newTask.trim() 
-              ? 'bg-yellow-600/80 hover:bg-yellow-500/80 text-white cursor-pointer' 
+              ? 'bg-gray-600/80 hover:bg-gray-500/80 text-white cursor-pointer' 
               : 'bg-gray-700 text-gray-400 cursor-not-allowed'
           }`}
         >

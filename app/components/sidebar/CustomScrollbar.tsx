@@ -20,14 +20,14 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children }) => {
         }
         
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(254, 240, 138, 0.3);
+          background: rgba(107, 114, 128, 0.3);
           border-radius: 10px;
-          border: 1px solid rgba(254, 240, 138, 0.1);
+          border: 1px solid rgba(107, 114, 128, 0.1);
           cursor: grab;
         }
         
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(254, 240, 138, 0.5);
+          background: rgba(107, 114, 128, 0.5);
           cursor: grab;
         }
         

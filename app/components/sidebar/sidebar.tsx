@@ -200,7 +200,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   const getPriorityColor = (priority: 'low' | 'medium' | 'high') => {
     switch (priority) {
       case 'high': return 'text-red-300 border-red-400/60';
-      case 'medium': return 'text-yellow-200 border-yellow-300/60';
+      case 'medium': return 'text-gray-200 border-gray-300/60';
       case 'low': return 'text-green-300 border-green-400/60';
       default: return 'text-gray-400 border-gray-400';
     }
@@ -209,7 +209,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   const getPriorityBg = (priority: 'low' | 'medium' | 'high') => {
     switch (priority) {
       case 'high': return 'bg-red-500/5';
-      case 'medium': return 'bg-yellow-500/5';
+      case 'medium': return 'bg-gray-500/5';
       case 'low': return 'bg-green-500/5';
       default: return 'bg-gray-500/5';
     }
@@ -238,7 +238,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         urgentTasks={urgentTasks}
       />
 
-      <div className={`fixed left-16 top-[72px] h-[calc(100vh-72px)] bg-black border-r border-yellow-200/10 z-30 overflow-hidden shadow-2xl transition-all duration-300 ease-out ${
+      <div className={`fixed left-16 top-[72px] h-[calc(100vh-72px)] bg-black border-r border-gray-800/30 z-30 overflow-hidden shadow-2xl transition-all duration-300 ease-out ${
         isOpen ? 'w-80 opacity-100 visible' : 'w-0 opacity-0 invisible'
       }`}>
         <SidebarHeader activeTab={activeTab} setIsOpen={setIsOpen} />
