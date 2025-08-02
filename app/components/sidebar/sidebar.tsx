@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { MessageCircle, CheckSquare, Menu } from 'lucide-react';
-import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, Timestamp, doc, deleteDoc, getDocs } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../../db/firebase';
 
@@ -11,7 +11,7 @@ import { SidebarProps, SidebarItem, Task, Conversation } from './types';
 import SidebarNav from './SidebarNav';
 import SidebarHeader from './SidebarHeader';
 import CustomScrollbar from './CustomScrollbar';
-import ChatList from './ChatList';
+import ChatListWithModal from './ChatList';
 import TaskPanel from './TaskPanel';
 
 
@@ -158,9 +158,67 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   
   // Función para crear un nuevo chat
   const createNewChat = () => {
-    // Redirigir a la página de chat sin ID para crear uno nuevo
-    // Esto forzará la creación de un nuevo chat
-    window.location.href = '/chat';
+    // Redirigir a la página de chat sin ID para crear uno nuevo sin recargar
+    window.history.pushState(null, '', '/chat');
+    // Disparar evento de navegación para que el componente de chat se actualice
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    window.dispatchEvent(new CustomEvent('urlchange'));
+  };
+
+  const handleDeleteChat = async (chatId: string) => {
+    console.log('Eliminando chat:', chatId);
+    try {
+      if (!userId) {
+        console.error('No hay usuario autenticado');
+        return;
+      }
+      
+      // Verificar si el chat que se está eliminando es el actualmente activo
+      const currentUrl = window.location.href;
+      const isCurrentChat = currentUrl.includes(`id=${chatId}`);
+      
+      // Primero eliminar todos los mensajes del chat
+      const messagesRef = collection(db, 'users', userId, 'chats', chatId, 'messages');
+      const messagesSnapshot = await getDocs(messagesRef);
+      
+      // Eliminar cada mensaje individualmente
+      const deletePromises = messagesSnapshot.docs.map(messageDoc => 
+        deleteDoc(doc(db, 'users', userId, 'chats', chatId, 'messages', messageDoc.id))
+      );
+      
+      await Promise.all(deletePromises);
+      console.log(`Eliminados ${deletePromises.length} mensajes del chat ${chatId}`);
+      
+      // Luego eliminar el chat mismo
+      const chatRef = doc(db, 'users', userId, 'chats', chatId);
+      await deleteDoc(chatRef);
+      
+      console.log('Chat eliminado exitosamente de Firebase:', chatId);
+      
+      // Si el chat eliminado era el activo, redirigir a otro chat o crear uno nuevo
+      if (isCurrentChat) {
+        // Buscar otro chat disponible (excluyendo el que acabamos de eliminar)
+        const otherChat = conversations.find(conv => conv.id !== chatId);
+        
+        if (otherChat) {
+          // Redirigir al primer chat disponible sin recargar la página
+          window.history.pushState(null, '', `/chat?id=${otherChat.id}`);
+          // Disparar evento de navegación para que el componente de chat se actualice
+          window.dispatchEvent(new PopStateEvent('popstate'));
+          window.dispatchEvent(new CustomEvent('urlchange'));
+        } else {
+          // Si no hay otros chats, ir a la página de chat para crear uno nuevo
+          window.history.pushState(null, '', '/chat');
+          window.dispatchEvent(new PopStateEvent('popstate'));
+          window.dispatchEvent(new CustomEvent('urlchange'));
+        }
+      }
+      
+      // El estado local se actualizará automáticamente gracias al listener onSnapshot
+    } catch (error) {
+      console.error('Error al eliminar chat:', error);
+      // Opcional: mostrar un mensaje de error al usuario
+    }
   };
 
   const toggleTask = (id: number) => {
@@ -254,10 +312,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                   </div>
                 </div>
               ) : (
-                <ChatList 
+                <ChatListWithModal 
                   conversations={conversations} 
                   onNewChat={createNewChat} 
-                  onSelectChat={(chatId) => window.location.href = `/chat?id=${chatId}`}
+                  onSelectChat={(chatId) => {
+                    window.history.pushState(null, '', `/chat?id=${chatId}`);
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                    window.dispatchEvent(new CustomEvent('urlchange'));
+                  }}
+                  onDeleteChat={handleDeleteChat}
                 />
               )}
             </div>

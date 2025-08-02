@@ -95,12 +95,30 @@ export default function ChatInterface() {
   
   // Obtener el ID del chat de la URL si existe
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const chatId = searchParams.get('id');
-    
-    if (chatId) {
+    const updateChatFromUrl = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const chatId = searchParams.get('id');
       setCurrentChatId(chatId);
-    }
+    };
+    
+    // Ejecutar al montar el componente
+    updateChatFromUrl();
+    
+    // Escuchar cambios en la URL sin recarga de página
+    window.addEventListener('popstate', updateChatFromUrl);
+    
+    // Crear un listener personalizado para cambios de URL programáticos
+    const handleUrlChange = () => {
+      setTimeout(updateChatFromUrl, 0); // Usar setTimeout para asegurar que la URL se haya actualizado
+    };
+    
+    window.addEventListener('urlchange', handleUrlChange);
+    
+    // Limpiar los listeners al desmontar
+    return () => {
+      window.removeEventListener('popstate', updateChatFromUrl);
+      window.removeEventListener('urlchange', handleUrlChange);
+    };
   }, []);
 
   const toggleSidebar = () => {

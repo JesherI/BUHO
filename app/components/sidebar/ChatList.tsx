@@ -1,14 +1,17 @@
-import React from 'react';
-import { PlusCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { Conversation } from './types';
+import DeleteChatModal from './DeleteChatModal';
 
 interface ChatListProps {
   conversations: Conversation[];
   onNewChat?: () => void;
   onSelectChat?: (chatId: string) => void;
+  onDeleteChat?: (chatId: string, chatTitle?: string) => void;
 }
 
-const ChatList: React.FC<ChatListProps> = ({ conversations, onNewChat, onSelectChat }) => {
+const ChatList: React.FC<ChatListProps> = ({ conversations, onNewChat, onSelectChat, onDeleteChat }) => {
   const handleNewChat = () => {
     if (onNewChat) {
       onNewChat();
@@ -26,12 +29,19 @@ const ChatList: React.FC<ChatListProps> = ({ conversations, onNewChat, onSelectC
       window.location.href = `/chat?id=${chatId}`;
     }
   };
+
+  const handleDeleteClick = (e: React.MouseEvent, chatId: string, chatTitle: string) => {
+    e.stopPropagation();
+    if (onDeleteChat) {
+      onDeleteChat(chatId, chatTitle);
+    }
+  };
   
   return (
     <div className="p-4">
       <button 
         onClick={handleNewChat}
-        className="w-full bg-yellow-600/80 hover:bg-yellow-500/80 text-white py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium mb-6 shadow-lg cursor-pointer"
+        className="w-full bg-gray-600/80 hover:bg-gray-500/80 text-white py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium mb-6 shadow-lg cursor-pointer"
       >
         <PlusCircle size={16} />
         Nuevo Chat
@@ -47,24 +57,87 @@ const ChatList: React.FC<ChatListProps> = ({ conversations, onNewChat, onSelectC
           conversations.map((conv) => (
             <div
               key={conv.id}
-              onClick={() => handleSelectChat(conv.id)}
-              className="p-4 rounded-xl bg-gray-950/60 hover:bg-gray-900/80 border border-gray-800 hover:border-yellow-200/20 cursor-pointer transition-all duration-200 group"
+              className="relative p-4 rounded-xl bg-gray-950/60 hover:bg-gray-900/80 border border-gray-800 hover:border-gray-200/20 cursor-pointer transition-all duration-200 group"
             >
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-white font-medium text-sm truncate group-hover:text-yellow-100 transition-colors select-none">
-                  {conv.title}
-                </h3>
-                <span className="text-xs text-yellow-200/60 ml-2 flex-shrink-0 bg-yellow-500/10 px-2 py-0.5 rounded-full select-none">
-                  {conv.time}
-                </span>
+              <div onClick={() => handleSelectChat(conv.id)} className="flex-1 pr-10">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-white font-medium text-sm truncate group-hover:text-gray-100 transition-colors select-none">
+                    {conv.title}
+                  </h3>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-gray-400 text-xs truncate group-hover:text-gray-300 select-none">{conv.preview}</p>
+                  <span className="text-xs text-gray-200/60 ml-2 flex-shrink-0 bg-gray-500/10 px-2 py-0.5 rounded-full select-none">
+                    {conv.time}
+                  </span>
+                </div>
               </div>
-              <p className="text-gray-400 text-xs truncate group-hover:text-gray-300 select-none">{conv.preview}</p>
+              
+              {/* Menu button */}
+              <div className="absolute top-2 right-2 z-10">
+                <button
+                  onClick={(e) => handleDeleteClick(e, conv.id, conv.title)}
+                  className="opacity-100 text-red-400 hover:text-red-200 transition-all duration-200 p-1.5 rounded-lg hover:bg-red-500/10 bg-red-500/20 border border-red-500/30"
+                  title="Eliminar chat"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
           ))
         )}
       </div>
+      
+
     </div>
   );
 };
 
-export default ChatList;
+// Modal renderizado fuera del contenedor principal
+const ChatListWithModal: React.FC<ChatListProps> = (props) => {
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; chatId: string; chatTitle: string }>({ 
+    isOpen: false, 
+    chatId: '', 
+    chatTitle: '' 
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteClick = (chatId: string, chatTitle?: string) => {
+    setDeleteModal({ isOpen: true, chatId, chatTitle: chatTitle || '' });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!props.onDeleteChat) return;
+    
+    setIsDeleting(true);
+    try {
+      await props.onDeleteChat(deleteModal.chatId);
+      setDeleteModal({ isOpen: false, chatId: '', chatTitle: '' });
+    } catch (error) {
+      console.error('Error al eliminar chat:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <>
+      <ChatList {...props} onDeleteChat={handleDeleteClick} />
+      
+      {/* Delete confirmation modal - rendered outside sidebar using portal */}
+      {typeof window !== 'undefined' && createPortal(
+        <DeleteChatModal
+          isOpen={deleteModal.isOpen}
+          onClose={() => {
+            setDeleteModal({ isOpen: false, chatId: '', chatTitle: '' });
+          }}
+          onConfirm={handleConfirmDelete}
+          chatTitle={deleteModal.chatTitle}
+          isDeleting={isDeleting}
+        />,
+        document.body
+      )}
+    </>
+  );
+};
+export default ChatListWithModal;
