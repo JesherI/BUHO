@@ -1,13 +1,33 @@
-export async function sendToGemini(message: string): Promise<string> {
+interface Message {
+    text: string;
+    sender: string;
+}
+
+export async function sendToGemini(message: string, conversationHistory: Message[] = []): Promise<string> {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
+    // Construir el contexto de la conversación
+    const contents = [];
+    
+    // Agregar los últimos 10 mensajes como contexto (para no sobrecargar la API)
+    const recentHistory = conversationHistory.slice(-10);
+    
+    for (const msg of recentHistory) {
+        contents.push({
+            parts: [{ text: msg.text }],
+            role: msg.sender === 'user' ? 'user' : 'model'
+        });
+    }
+    
+    // Agregar el mensaje actual del usuario
+    contents.push({
+        parts: [{ text: message }],
+        role: 'user'
+    });
+
     const body = {
-        contents: [
-            {
-                parts: [{ text: message }],
-            },
-        ],
+        contents: contents,
     };
 
     try {

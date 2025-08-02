@@ -256,8 +256,8 @@ export default function ChatInterface() {
       setMessages((prev) => [...prev, { text: "Pensando...", sender: "assistant" }]);
 
       try {
-        // Obtener respuesta de Gemini
-        const response = await sendToGemini(userMessage);
+        // Obtener respuesta de Gemini con el contexto de la conversación
+        const response = await sendToGemini(userMessage, messages);
         
         // Actualizar la interfaz con la respuesta
         setMessages((prev) => [

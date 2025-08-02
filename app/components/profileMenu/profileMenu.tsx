@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { User, LogOut, Shield, FileText, ChevronRight, ExternalLink, } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "../../db/firebase";
@@ -77,13 +78,16 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ onProfileClick }) => {
         className="relative group cursor-pointer"
       >
         <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-amber-400/60 shadow-lg hover:shadow-amber-400/20 hover:shadow-xl transition-all duration-300 hover:scale-105 hover:border-amber-400">
-          <img
+          <Image
             src={
               user?.photoURL ||
               "https://ui-avatars.com/api/?name=User&background=2c2c2c&color=fff&bold=true"
             }
             alt="Profile"
+            width={40}
+            height={40}
             className="w-full h-full object-cover"
+            priority
           />
         </div>
         <div className="absolute inset-0 rounded-full bg-amber-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
@@ -95,13 +99,16 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ onProfileClick }) => {
           <div className="bg-gradient-to-r from-black to-gray-900 p-3 sm:p-4 border-b border-amber-400/20 select-none">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-amber-400/40 flex-shrink-0">
-                <img
+                <Image
                   src={
                     user?.photoURL ||
                     "https://ui-avatars.com/api/?name=User&background=2c2c2c&color=fff&bold=true"
                   }
                   alt="Profile"
+                  width={48}
+                  height={48}
                   className="w-full h-full object-cover"
+                  priority
                 />
               </div>
               <div className="flex-1 min-w-0">
