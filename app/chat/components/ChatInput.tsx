@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 
 interface ChatInputProps {
   newMessage: string;
@@ -7,6 +7,21 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ newMessage, setNewMessage, sendMessage }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Ajustar altura del textarea cuando cambia el contenido
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 128) + "px";
+    }
+  }, [newMessage]);
+  
+  // Enfocar el textarea al cargar el componente
+  useEffect(() => {
+    textareaRef.current?.focus();
+  }, []);
+  
   return (
     <div className="flex-shrink-0 w-full border-t border-gray-800 bg-neutral-900/65 backdrop-blur-sm">
       <div className="w-full px-4 py-4">
@@ -14,6 +29,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ newMessage, setNewMessage, sendMe
           <div className="flex items-end gap-2 bg-white/10 backdrop-blur-md rounded-2xl p-2 shadow-lg border border-neutral-900/25">
             <div className="flex-1 min-h-[44px] max-h-32 overflow-y-auto">
               <textarea
+                ref={textareaRef}
                 className="w-full bg-transparent text-white placeholder-gray-400 resize-none px-3 py-2 focus:outline-none text-sm leading-relaxed"
                 placeholder="Escribe tu mensaje..."
                 value={newMessage}
@@ -25,11 +41,6 @@ const ChatInput: React.FC<ChatInputProps> = ({ newMessage, setNewMessage, sendMe
                   }
                 }}
                 rows={1}
-                onInput={(e) => {
-                  const target = e.target as HTMLTextAreaElement;
-                  target.style.height = "auto";
-                  target.style.height = Math.min(target.scrollHeight, 128) + "px";
-                }}
               />
             </div>
             <div className="flex gap-1">

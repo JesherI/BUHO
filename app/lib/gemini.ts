@@ -1,6 +1,6 @@
 export async function sendToGemini(message: string): Promise<string> {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+    const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
     const body = {
         contents: [

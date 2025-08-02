@@ -1,15 +1,42 @@
 import { Fragment } from "react";
 
 const MarkdownRenderer = ({ content }: { content: string }) => {
+  // Si el contenido es nulo o indefinido, devolver un fragmento vacío
+  if (!content) return <Fragment></Fragment>;
+  
   const renderInline = (text: string) => {
-    const segments = text.split(/(\*\*.*?\*\*|\*.*?\*)/g).filter(Boolean);
+    // Expresión regular para detectar formatos de texto y enlaces
+    const segments = text.split(/(\*\*.*?\*\*|\*.*?\*|\[.*?\]\(.*?\))/g).filter(Boolean);
+    
     return segments.map((segment, i) => {
+      // Negrita
       if (segment.startsWith("**") && segment.endsWith("**")) {
         return <strong key={i}>{segment.slice(2, -2)}</strong>;
       }
+      
+      // Cursiva
       if (segment.startsWith("*") && segment.endsWith("*")) {
         return <em key={i}>{segment.slice(1, -1)}</em>;
       }
+      
+      // Enlaces [texto](url)
+      const linkMatch = segment.match(/\[(.*?)\]\((.*?)\)/);
+      if (linkMatch) {
+        const [, text, url] = linkMatch;
+        return (
+          <a 
+            key={i} 
+            href={url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-amber-400 hover:text-amber-300 underline"
+          >
+            {text}
+          </a>
+        );
+      }
+      
+      // Texto normal
       return <Fragment key={i}>{segment}</Fragment>;
     });
   };

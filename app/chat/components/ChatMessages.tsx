@@ -15,8 +15,11 @@ interface ChatMessagesProps {
 const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isSidebarOpen }) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
+  // Desplazamiento automático al último mensaje
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
   if (messages.length === 0) return null;
@@ -32,11 +35,18 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isSidebarOpen }) 
             return (
               <div key={index} className="w-full mb-6">
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Image src="/logo.png" alt="Logo" width={32} height={32} />
+                  <div className="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <Image src="/logo.png" alt="Logo" width={32} height={32} priority />
                   </div>
                   <div className="max-w-[80%] bg-gray-800 text-white px-4 py-3 rounded-2xl rounded-tl-md shadow-sm text-sm leading-relaxed">
-                    Generando respuesta...
+                    <div className="flex items-center">
+                      <span>Generando respuesta</span>
+                      <span className="ml-1 inline-flex">
+                        <span className="animate-bounce">.</span>
+                        <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>.</span>
+                        <span className="animate-bounce" style={{ animationDelay: "0.4s" }}>.</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -48,15 +58,15 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isSidebarOpen }) 
               {msg.sender === "user" ? (
                 <div className="flex justify-end">
                   <div className="max-w-[80%] bg-gradient-to-r from-[#f5deb3] via-[#d4af37] to-[#cfae7b] text-black px-4 py-3 rounded-2xl rounded-br-md shadow-md">
-                    <p className="text-sm leading-relaxed font-medium break-words">{msg.text}</p>
+                    <p className="text-sm leading-relaxed font-medium break-words whitespace-pre-wrap">{msg.text}</p>
                   </div>
                 </div>
               ) : (
                 <div className="flex gap-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    <Image src="/logo.png" alt="Logo" width={32} height={32} />
+                    <Image src="/logo.png" alt="Logo" width={32} height={32} priority />
                   </div>
-                  <div className="max-w-[80%] bg-gray-800 text-white px-4 py-3 rounded-2xl rounded-tl-md shadow-sm text-sm leading-relaxed">
+                  <div className="max-w-[80%] bg-gray-800 text-white px-4 py-3 rounded-2xl rounded-tl-md shadow-sm text-sm leading-relaxed overflow-auto">
                     <MarkdownRenderer content={msg.text} />
                   </div>
                 </div>
