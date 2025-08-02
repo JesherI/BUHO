@@ -1,20 +1,18 @@
 'use client';
 
-import React, { useState} from "react";
-import { MessageCircle, CheckSquare, Menu } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { MessageCircle, CheckSquare, Menu } from 'lucide-react';
+import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth, db } from '../../db/firebase';
 
-// Importar tipos
-import { SidebarProps, SidebarItem, Task, Conversation } from "./types";
+import { SidebarProps, SidebarItem, Task, Conversation } from './types';
 
-// Importar componentes
-import SidebarNav from "./SidebarNav";
-import SidebarHeader from "./SidebarHeader";
-import CustomScrollbar from "./CustomScrollbar";
-import ChatList from "./ChatList";
-import TaskPanel from "./TaskPanel";
-
-// Las utilidades se implementarán directamente en este componente
-
+import SidebarNav from './SidebarNav';
+import SidebarHeader from './SidebarHeader';
+import CustomScrollbar from './CustomScrollbar';
+import ChatList from './ChatList';
+import TaskPanel from './TaskPanel';
 
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
@@ -32,38 +30,138 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   const [tasks, setTasks] = useState<Task[]>([
     { 
       id: 1, 
-      text: "Terminar interfaz", 
+      text: "Crear presentación para cliente", 
       completed: false, 
       priority: 'high',
-      dueDate: '2025-06-15',
-      category: 'Desarrollo'
+      dueDate: '2023-06-15',
+      category: 'Trabajo'
     },
     { 
       id: 2, 
-      text: "Conectar Firebase", 
-      completed: false, 
+      text: "Investigar nuevas tecnologías", 
+      completed: true, 
       priority: 'medium',
-      dueDate: '2025-06-16',
-      category: 'Backend'
+      dueDate: '2023-06-10',
+      category: 'Desarrollo'
     },
     { 
       id: 3, 
-      text: "Agregar historial", 
-      completed: true, 
+      text: "Actualizar documentación", 
+      completed: false, 
       priority: 'low',
-      category: 'Features'
+      dueDate: '2023-06-20',
+      category: 'Documentación'
+    },
+    { 
+      id: 4, 
+      text: "Reunión con equipo de diseño", 
+      completed: false, 
+      priority: 'high',
+      dueDate: '2023-06-12',
+      category: 'Reuniones'
+    },
+    { 
+      id: 5, 
+      text: "Revisar pull requests", 
+      completed: false, 
+      priority: 'medium',
+      dueDate: '2023-06-14',
+      category: 'Desarrollo'
     },
   ]);
   const [newTask, setNewTask] = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [newTaskDueDate, setNewTaskDueDate] = useState("");
   const [newTaskCategory, setNewTaskCategory] = useState("");
+  // Estado para el usuario y las conversaciones
+  const [userId, setUserId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [isLoadingChats, setIsLoadingChats] = useState(true);
+  
+  // Efecto para manejar la autenticación
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+        setConversations([]);
+        setIsLoadingChats(false);
+      }
+    });
+    
+    return () => unsubscribe();
+  }, []);
+  
+  // Efecto para cargar conversaciones cuando cambie el userId
+  useEffect(() => {
+    if (userId) {
+      const unsubscribe = loadConversations(userId);
+      return unsubscribe;
+    }
+  }, [userId]);
 
-  const conversations: Conversation[] = [
-    { id: 1, title: "Chat con amigas", preview: "Hola, ¿cómo están?", time: "2 min" },
-    { id: 2, title: "Proyecto universidad", preview: "Necesito ayuda con...", time: "1 h" },
-    { id: 3, title: "Recetas de cocina", preview: "¿Tienes alguna receta fácil?", time: "3 h" },
-  ];
+  // Función para cargar las conversaciones
+  const loadConversations = (uid: string) => {
+    try {
+      setIsLoadingChats(true);
+      
+      // Consulta para obtener chats ordenados por fecha de actualización
+      const chatsRef = collection(db, "users", uid, "chats");
+      const q = query(chatsRef, orderBy("updatedAt", "desc"));
+      
+      // Configurar listener en tiempo real
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const conversationsData: Conversation[] = [];
+        
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const updatedAt = data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt ? new Date(data.updatedAt) : null;
+          
+          // Calcular tiempo relativo
+          let timeAgo = "ahora";
+          if (updatedAt) {
+            const now = new Date();
+            const diffMinutes = Math.floor((now.getTime() - updatedAt.getTime()) / (1000 * 60));
+            
+            if (diffMinutes < 1) {
+              timeAgo = "ahora";
+            } else if (diffMinutes < 60) {
+              timeAgo = `${diffMinutes}m`;
+            } else if (diffMinutes < 1440) {
+              timeAgo = `${Math.floor(diffMinutes / 60)}h`;
+            } else {
+              timeAgo = `${Math.floor(diffMinutes / 1440)}d`;
+            }
+          }
+          
+          conversationsData.push({
+            id: doc.id,
+            title: data.title || "Chat sin título",
+            preview: data.lastMessage || "No hay mensajes",
+            time: timeAgo
+          });
+        });
+        
+        setConversations(conversationsData);
+        setIsLoadingChats(false);
+      });
+      
+      // Devolver función de limpieza para desuscribirse
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error al cargar conversaciones:", error);
+      setIsLoadingChats(false);
+      return () => {}; // Función de limpieza vacía en caso de error
+    }
+  };
+  
+  // Función para crear un nuevo chat
+  const createNewChat = () => {
+    // Redirigir a la página de chat sin ID para crear uno nuevo
+    // Esto forzará la creación de un nuevo chat
+    window.location.href = '/chat';
+  };
 
   const toggleTask = (id: number) => {
     setTasks(prev => prev.map(task => 
@@ -108,9 +206,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     }
   };
 
-  /**
-   * Obtiene el color de fondo según la prioridad de la tarea
-   */
   const getPriorityBg = (priority: 'low' | 'medium' | 'high') => {
     switch (priority) {
       case 'high': return 'bg-red-500/5';
@@ -120,16 +215,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     }
   };
 
-  /**
-   * Verifica si una tarea está vencida
-   */
   const isTaskOverdue = (dueDate?: string) => {
     if (!dueDate) return false;
     return new Date(dueDate) < new Date();
   };
 
   const sidebarItems: SidebarItem[] = [
-    { id: 'toggle', icon: Menu, label: 'Menu' },
+    { id: 'toggle', icon: Menu, label: 'Ocultar' },
     { id: 'chats', icon: MessageCircle, label: 'Chats', count: conversations.length },
     { id: 'tasks', icon: CheckSquare, label: 'Tareas', count: pendingTasks },
   ];
@@ -137,7 +229,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
   return (
     <>
-      {/* Barra de navegación lateral */}
       <SidebarNav
         sidebarItems={sidebarItems}
         activeTab={activeTab}
@@ -147,19 +238,31 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         urgentTasks={urgentTasks}
       />
 
-      {/* Panel principal del sidebar */}
       <div className={`fixed left-16 top-[72px] h-[calc(100vh-72px)] bg-black border-r border-yellow-200/10 z-30 overflow-hidden shadow-2xl transition-all duration-300 ease-out ${
         isOpen ? 'w-80 opacity-100 visible' : 'w-0 opacity-0 invisible'
       }`}>
-        {/* Encabezado del panel */}
         <SidebarHeader activeTab={activeTab} setIsOpen={setIsOpen} />
 
-        {/* Contenido con scrollbar personalizado */}
         <CustomScrollbar>
-          {/* Panel de chats */}
-          {activeTab === 'chats' && <ChatList conversations={conversations} />}
+          {activeTab === 'chats' && (
+            <div>
+              {isLoadingChats ? (
+                <div className="p-4 text-center">
+                  <div className="animate-pulse flex flex-col items-center">
+                    <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+                  </div>
+                </div>
+              ) : (
+                <ChatList 
+                  conversations={conversations} 
+                  onNewChat={createNewChat} 
+                  onSelectChat={(chatId) => window.location.href = `/chat?id=${chatId}`}
+                />
+              )}
+            </div>
+          )}
 
-          {/* Panel de tareas */}
           {activeTab === 'tasks' && (
             <TaskPanel
               tasks={tasks}
@@ -184,7 +287,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         </CustomScrollbar>
       </div>
 
-      {/* Overlay para cerrar el sidebar en dispositivos móviles */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black/30 z-20 lg:hidden cursor-pointer"

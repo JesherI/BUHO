@@ -8,8 +8,10 @@ import {
   addDoc,
   doc,
   getDocs,
+  getDoc,
   query,
   where,
+  orderBy,
   serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
@@ -88,9 +90,18 @@ export default function ChatInterface() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [chatTitle, setChatTitle] = useState("Nuevo Chat");
 
-  const chatTitle = "Chat con Asistente";
-  const chatCategory = "General";
+  
+  // Obtener el ID del chat de la URL si existe
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const chatId = searchParams.get('id');
+    
+    if (chatId) {
+      setCurrentChatId(chatId);
+    }
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -100,37 +111,73 @@ export default function ChatInterface() {
     setShowProfile(true);
   };
 
+  // Efecto para manejar la autenticación
   useEffect(() => {
-    // Indicar que estamos cargando
-    setLoading(true);
-    
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push("/log-in");
+        return;
+      }
+      setUserId(user.uid);
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  // Efecto para cargar o crear chat cuando cambie el usuario o el chatId de la URL
+  useEffect(() => {
+    const loadChat = async () => {
+      if (!userId) return;
+      
+      setLoading(true);
+      
       try {
-        if (!user) {
-          // Redirigir al login si no hay usuario autenticado
-          router.push("/log-in");
-          return;
+        let chatId = currentChatId;
+        
+        // Si ya tenemos un ID de chat (de la URL), cargar ese chat
+        if (chatId) {
+          try {
+            // Verificar que el chat existe y pertenece al usuario
+            const chatRef = doc(db, "users", userId, "chats", chatId);
+            const chatDoc = await getDoc(chatRef);
+            
+            if (chatDoc.exists()) {
+              const chatData = chatDoc.data();
+              setChatTitle(chatData.title || "Chat sin título");
+            } else {
+              // Si el chat no existe, crear uno nuevo
+              chatId = await getOrCreateChat("Nuevo Chat", "General", userId);
+              setCurrentChatId(chatId);
+              setChatTitle("Nuevo Chat");
+              window.history.replaceState(null, '', `/chat?id=${chatId}`);
+            }
+          } catch (error) {
+            console.error("Error al verificar el chat:", error);
+            // Si hay error, crear un nuevo chat
+            chatId = await getOrCreateChat("Nuevo Chat", "General", userId);
+            setCurrentChatId(chatId);
+            setChatTitle("Nuevo Chat");
+            window.history.replaceState(null, '', `/chat?id=${chatId}`);
+          }
+        } else {
+          // Si no hay ID de chat, crear uno nuevo
+          chatId = await getOrCreateChat("Nuevo Chat", "General", userId);
+          setCurrentChatId(chatId);
+          setChatTitle("Nuevo Chat");
+          
+          // Actualizar la URL con el ID del chat sin recargar la página
+          window.history.replaceState(null, '', `/chat?id=${chatId}`);
         }
         
-        // Guardar el ID del usuario
-        setUserId(user.uid);
-        
-        // Obtener o crear el chat
-        const chatId = await getOrCreateChat(chatTitle, chatCategory, user.uid);
-        setCurrentChatId(chatId);
-        
         // Cargar mensajes existentes
-        const messagesRef = collection(db, "users", user.uid, "chats", chatId, "messages");
-        const messagesSnapshot = await getDocs(messagesRef);
+        const messagesRef = collection(db, "users", userId, "chats", chatId, "messages");
+        const q = query(messagesRef, orderBy("timestamp", "asc"));
+        const messagesSnapshot = await getDocs(q);
         const loadedMessages = messagesSnapshot.docs.map(doc => doc.data());
         
-        // Ordenar mensajes por timestamp si existe
+        // Filtrar y mapear mensajes
         const sortedMessages = loadedMessages
           .filter(msg => msg.text && msg.sender)
-          .sort((a, b) => {
-            if (!a.timestamp || !b.timestamp) return 0;
-            return a.timestamp.seconds - b.timestamp.seconds;
-          })
           .map(msg => ({
             text: msg.text,
             sender: msg.sender
@@ -139,16 +186,13 @@ export default function ChatInterface() {
         setMessages(sortedMessages);
       } catch (error) {
         console.error("Error al inicializar el chat:", error);
-        // Mostrar algún mensaje de error al usuario si es necesario
       } finally {
-        // Siempre finalizar la carga, incluso si hay errores
         setLoading(false);
       }
-    });
+    };
 
-    // Limpiar el listener al desmontar
-    return () => unsubscribe();
-  }, [router, chatTitle, chatCategory]);
+    loadChat();
+  }, [userId, currentChatId]);
 
   const sendMessage = async () => {
     // Validar que hay un mensaje para enviar y que tenemos los datos necesarios
@@ -163,6 +207,24 @@ export default function ChatInterface() {
       // Añadir mensaje del usuario a la interfaz
       setMessages((prev) => [...prev, { text: userMessage, sender: "user" }]);
       setNewMessage("");
+      
+      // Si es el primer mensaje y el título es genérico, actualizarlo con el contenido del mensaje
+      if (messages.length === 0 && chatTitle === "Nuevo Chat") {
+        // Limitar el título a 50 caracteres
+        const newTitle = userMessage.length > 50 
+          ? userMessage.substring(0, 47) + "..."
+          : userMessage;
+        
+        setChatTitle(newTitle);
+        
+        // Actualizar el título del chat en Firestore
+        try {
+          const chatRef = doc(db, "users", userId, "chats", currentChatId);
+          await updateDoc(chatRef, { title: newTitle });
+        } catch (error) {
+          console.error("Error al actualizar el título del chat:", error);
+        }
+      }
       
       // Guardar mensaje del usuario en Firestore
       try {

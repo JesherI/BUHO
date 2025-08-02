@@ -8,7 +8,7 @@ export interface Task {
 }
 
 export interface Conversation {
-  id: number;
+  id: string;
   title: string;
   preview: string;
   time: string;
