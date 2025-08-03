@@ -259,6 +259,8 @@ export default function ChatInterface() {
         // Obtener respuesta de Gemini con el contexto de la conversación
         const response = await sendToGemini(userMessage, messages);
         
+        console.log("Respuesta de Gemini:", response);
+        
         // Actualizar la interfaz con la respuesta
         setMessages((prev) => [
           ...prev.slice(0, -1),

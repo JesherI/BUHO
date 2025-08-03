@@ -50,7 +50,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ onProfileClick }) => {
 
   const handleLogout = async () => {
     await signOut(auth);
-    router.push("/log-in");
+    router.push("/");
   };
 
   const menuItems = {
