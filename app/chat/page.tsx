@@ -25,20 +25,16 @@ import { sendToGemini } from "../lib/gemini";
 import ChatMessages from "./components/ChatMessages";
 import ChatInput from "./components/ChatInput";
 
-// 🔧 Crea o recupera chat por título y categoría
 async function getOrCreateChat(title: string, category: string, userId: string) {
   try {
-    // Buscar chat existente
     const chatsRef = collection(db, "users", userId, "chats");
     const q = query(chatsRef, where("title", "==", title), where("category", "==", category));
     const snapshot = await getDocs(q);
 
-    // Si existe, devolver su ID
     if (!snapshot.empty) {
       return snapshot.docs[0].id;
     }
 
-    // Si no existe, crear uno nuevo
     const newChatRef = await addDoc(chatsRef, {
       title,
       category,
@@ -49,34 +45,90 @@ async function getOrCreateChat(title: string, category: string, userId: string) 
     return newChatRef.id;
   } catch (error) {
     console.error("Error al crear o recuperar chat:", error);
-    throw error; // Propagar el error para manejarlo en el componente
+    throw error; 
   }
 }
 
 // 💬 Guarda un mensaje
 async function saveMessage(userId: string, chatId: string, text: string, sender: "user" | "assistant") {
   try {
-    // Referencia a la colección de mensajes
     const messagesRef = collection(db, "users", userId, "chats", chatId, "messages");
     
-    // Añadir el mensaje
     const docRef = await addDoc(messagesRef, {
       text,
       sender,
       timestamp: serverTimestamp(),
     });
     
-    // Actualizar timestamp del chat para ordenar por último mensaje
     const chatRef = doc(db, "users", userId, "chats", chatId);
     await updateDoc(chatRef, {
       updatedAt: serverTimestamp(),
-      lastMessage: text.substring(0, 100) // Guardar una vista previa del último mensaje
+      lastMessage: text.substring(0, 100)
     });
     
     return docRef.id;
   } catch (error) {
     console.error("Error al guardar mensaje:", error);
     throw error;
+  }
+}
+
+async function getUserContext(userId: string) {
+  try {
+    const userContext: {
+      profile?: {
+        username?: string;
+        academicContext?: string;
+      };
+      tasks?: Array<{
+        text: string;
+        completed: boolean;
+        priority?: string;
+        dueDate?: string;
+        category?: string;
+      }>;
+    } = {};
+    
+    try {
+      const userRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userRef);
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        userContext.profile = {
+          username: userData.username || userData.displayName,
+          academicContext: userData.academicContext
+        };
+      }
+    } catch (error) {
+      console.error("Error al obtener perfil del usuario:", error);
+    }
+    
+    try {
+      const tasksRef = collection(db, "users", userId, "tasks");
+      const tasksSnapshot = await getDocs(tasksRef);
+      
+      const tasks = tasksSnapshot.docs.map(doc => {
+        const taskData = doc.data();
+        return {
+          text: taskData.text,
+          completed: taskData.completed || false,
+          priority: taskData.priority,
+          dueDate: taskData.dueDate,
+          category: taskData.category
+        };
+      });
+      
+      userContext.tasks = tasks;
+    } catch (error) {
+      console.error("Error al obtener tareas del usuario:", error);
+      userContext.tasks = [];
+    }
+    
+    return userContext;
+  } catch (error) {
+    console.error("Error al obtener contexto del usuario:", error);
+    return {};
   }
 }
 
@@ -92,24 +144,19 @@ export default function ChatInterface() {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [chatTitle, setChatTitle] = useState("Nuevo Chat");
 
-  
-  // Obtener el ID del chat de la URL si existe
   useEffect(() => {
     const updateChatFromUrl = () => {
       const searchParams = new URLSearchParams(window.location.search);
       const chatId = searchParams.get('id');
       setCurrentChatId(chatId);
     };
-    
-    // Ejecutar al montar el componente
+
     updateChatFromUrl();
-    
-    // Escuchar cambios en la URL sin recarga de página
+  
     window.addEventListener('popstate', updateChatFromUrl);
     
-    // Crear un listener personalizado para cambios de URL programáticos
     const handleUrlChange = () => {
-      setTimeout(updateChatFromUrl, 0); // Usar setTimeout para asegurar que la URL se haya actualizado
+      setTimeout(updateChatFromUrl, 0); 
     };
     
     window.addEventListener('urlchange', handleUrlChange);
@@ -142,7 +189,6 @@ export default function ChatInterface() {
     return () => unsubscribe();
   }, [router]);
 
-  // Efecto para cargar o crear chat cuando cambie el usuario o el chatId de la URL
   useEffect(() => {
     const loadChat = async () => {
       if (!userId) return;
@@ -152,10 +198,8 @@ export default function ChatInterface() {
       try {
         let chatId = currentChatId;
         
-        // Si ya tenemos un ID de chat (de la URL), cargar ese chat
         if (chatId) {
           try {
-            // Verificar que el chat existe y pertenece al usuario
             const chatRef = doc(db, "users", userId, "chats", chatId);
             const chatDoc = await getDoc(chatRef);
             
@@ -226,7 +270,6 @@ export default function ChatInterface() {
       setMessages((prev) => [...prev, { text: userMessage, sender: "user" }]);
       setNewMessage("");
       
-      // Si es el primer mensaje y el título es genérico, actualizarlo con el contenido del mensaje
       if (messages.length === 0 && chatTitle === "Nuevo Chat") {
         // Limitar el título a 50 caracteres
         const newTitle = userMessage.length > 50 
@@ -256,8 +299,11 @@ export default function ChatInterface() {
       setMessages((prev) => [...prev, { text: "Pensando...", sender: "assistant" }]);
 
       try {
-        // Obtener respuesta de Gemini con el contexto de la conversación
-        const response = await sendToGemini(userMessage, messages);
+        // Obtener contexto del usuario (perfil y tareas)
+        const userContext = await getUserContext(userId);
+        
+        // Obtener respuesta de Gemini con el contexto de la conversación y del usuario
+        const response = await sendToGemini(userMessage, messages, userContext);
         
         console.log("Respuesta de Gemini:", response);
         

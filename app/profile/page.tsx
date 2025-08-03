@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { auth, db } from "../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { Check, X } from "lucide-react";
 
 interface ProfileCardProps {
   onClose: () => void;
@@ -16,6 +17,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
   const [academicContext, setAcademicContext] = useState("");
   const [photoBase64, setPhotoBase64] = useState("");
   const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -76,18 +78,39 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
         academicContext,
         photoBase64,
       });
-      alert("Perfil actualizado correctamente");
-      onClose();
+      setNotification({type: 'success', message: 'Successful'});
+      setTimeout(() => {
+        setNotification(null);
+        onClose();
+      }, 2000);
     } catch (error) {
       console.error(error);
-      alert("Error al actualizar el perfil");
+      setNotification({type: 'error', message: 'Error al actualizar el perfil'});
+      setTimeout(() => setNotification(null), 3000);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center z-50 p-4" style={{
+    <>
+      {/* Notificación */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-[60] px-6 py-3 rounded-xl shadow-lg backdrop-blur-sm border flex items-center gap-3 transition-all duration-300 ${
+          notification.type === 'success' 
+            ? 'bg-emerald-600/90 text-white border-emerald-500/30' 
+            : 'bg-red-600/90 text-white border-red-500/30'
+        }`}>
+          {notification.type === 'success' ? (
+            <Check className="w-5 h-5" />
+          ) : (
+            <X className="w-5 h-5" />
+          )}
+          <span className="font-medium">{notification.message}</span>
+        </div>
+      )}
+      
+      <div className="fixed inset-0 flex justify-center items-center z-50 p-4" style={{
       background: 'radial-gradient(ellipse at center, #0a0a0a 0%, #000000 50%, #000000 100%)'
     }}>
       <div className="relative max-w-md w-full">
@@ -204,6 +227,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

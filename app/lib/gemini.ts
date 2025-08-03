@@ -3,12 +3,72 @@ interface Message {
     sender: string;
 }
 
-export async function sendToGemini(message: string, conversationHistory: Message[] = []): Promise<string> {
+interface UserContext {
+    profile?: {
+        username?: string;
+        academicContext?: string;
+    };
+    tasks?: Array<{
+        text: string;
+        completed: boolean;
+        priority?: string;
+        dueDate?: string;
+        category?: string;
+    }>;
+}
+
+export async function sendToGemini(
+    message: string, 
+    conversationHistory: Message[] = [], 
+    userContext?: UserContext
+): Promise<string> {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     
     const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
     const contents = [];
+    
+    // Construir contexto del usuario
+    let contextInfo = '';
+    
+    if (userContext?.profile?.username) {
+        contextInfo += `\n\n📚 **Contexto del estudiante:**\n`;
+        contextInfo += `- Nombre: ${userContext.profile.username}\n`;
+        
+        if (userContext.profile.academicContext) {
+            contextInfo += `- Contexto académico: ${userContext.profile.academicContext}\n`;
+        }
+    }
+    
+    if (userContext?.tasks && userContext.tasks.length > 0) {
+        contextInfo += `\n📝 **Tareas actuales del estudiante:**\n`;
+        
+        const pendingTasks = userContext.tasks.filter(task => !task.completed);
+        const completedTasks = userContext.tasks.filter(task => task.completed);
+        
+        if (pendingTasks.length > 0) {
+            contextInfo += `\n🔄 **Tareas pendientes (${pendingTasks.length}):**\n`;
+            pendingTasks.slice(0, 5).forEach((task, index) => {
+                const priority = task.priority ? ` [${task.priority}]` : '';
+                const dueDate = task.dueDate ? ` (Vence: ${task.dueDate})` : '';
+                const category = task.category ? ` - ${task.category}` : '';
+                contextInfo += `${index + 1}. ${task.text}${priority}${dueDate}${category}\n`;
+            });
+        }
+        
+        if (completedTasks.length > 0) {
+            contextInfo += `\n✅ **Tareas completadas recientemente (${completedTasks.length}):**\n`;
+            completedTasks.slice(-3).forEach((task, index) => {
+                contextInfo += `${index + 1}. ${task.text}\n`;
+            });
+        }
+        
+        contextInfo += `\n💡 **Usa esta información para:**\n`;
+        contextInfo += `- Entender mejor las preguntas del estudiante\n`;
+        contextInfo += `- Ofrecer ayuda específica con sus tareas\n`;
+        contextInfo += `- Sugerir organización y priorización\n`;
+        contextInfo += `- Motivar según su progreso\n`;
+    }
     
     const systemPrompt = `Eres Buho IA 🦉, un asistente súper inteligente y divertido que ayuda a estudiantes. Tu personalidad es:
 
@@ -26,7 +86,7 @@ Cuando respondas:
 - 😅 Sé empático: "Sé que puede ser confuso..." "No te preocupes..."
 - 🔥 Usa jerga juvenil apropiada: "está genial", "súper cool", "increíble"
 
-¡Haz que aprender sea divertido y emocionante! 🌟`;
+¡Haz que aprender sea divertido y emocionante! 🌟${contextInfo}`;
     
     contents.push({
         parts: [{ text: systemPrompt }],

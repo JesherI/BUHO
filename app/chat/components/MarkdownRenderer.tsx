@@ -18,7 +18,6 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
   };
   
   const renderInline = (text: string) => {
-    // Expresión regular para detectar formatos de texto y enlaces
     const segments = text.split(/(\*\*.*?\*\*|\*.*?\*|\[.*?\]\(.*?\))/g).filter(Boolean);
     
     return segments.map((segment, i) => {
@@ -49,7 +48,6 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
         );
       }
       
-      // Texto normal
       return <Fragment key={i}>{segment}</Fragment>;
     });
   };
@@ -64,7 +62,6 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
       return (
         <div key={index} className="relative group my-4">
           <div className="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-2xl">
-            {/* Header del bloque de código */}
             <div className="flex items-center justify-between bg-gray-900/50 px-4 py-2 border-b border-gray-800">
               <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">
                 {language || 'código'}
