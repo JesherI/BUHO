@@ -20,7 +20,7 @@ import { auth, db } from "../db/firebase";
 import Sidebar from "../components/sidebar/sidebar";
 import ProfileMenu from "../components/profileMenu/profileMenu";
 import Navbar from "../components/navbar/navbar";
-import ProfileCard from "../profile/page";
+import ProfileCard from "../profile/ProfileCard";
 import { sendToGemini } from "../lib/gemini";
 import ChatMessages from "./components/ChatMessages";
 import ChatInput from "./components/ChatInput";

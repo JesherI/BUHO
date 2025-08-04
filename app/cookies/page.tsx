@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Cookie, Shield, Settings, Save, Check, Mail, Calendar, Users, Lock, User } from 'lucide-react';
+import { ArrowLeft, Shield, Settings, Save, Check, Mail, Calendar, Users, Lock, User } from 'lucide-react';
 
 // Simulamos cookieUtils para el ejemplo
 const cookieUtils = {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Shield, Eye, Database, Lock, Trash2, Globe, Calendar, Users, Plus, Minus, ArrowLeft, Mail, Home, Zap } from 'lucide-react';
+import { Shield, Eye, Database, Lock, Trash2, Globe, Calendar, Users, Plus, Minus, ArrowLeft, Mail, Home } from 'lucide-react';
 
 const PrivacyPolicyPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -233,7 +233,7 @@ const PrivacyPolicyPage: React.FC = () => {
         <div className="relative">
           <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-500/50 via-yellow-500/50 to-amber-600/50"></div>
           
-          {sections.map((section, index) => (
+          {sections.map((section) => (
             <div key={section.id} className="relative mb-12">
               <div className={`absolute left-6 w-4 h-4 rounded-full border-2 transition-all duration-300 ${
                 activeSection === section.id 

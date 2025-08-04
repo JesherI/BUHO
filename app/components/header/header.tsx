@@ -22,7 +22,7 @@ const preguntasEjemplo = [
 ];
 
 // Hook personalizado para detectar cuando un elemento está visible
-const useIntersectionObserver = (options = {}): [React.RefObject<HTMLDivElement>, boolean] => {
+const useIntersectionObserver = (options = {}): [React.RefObject<HTMLDivElement | null>, boolean] => {
   const [isVisible, setIsVisible] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +43,7 @@ const useIntersectionObserver = (options = {}): [React.RefObject<HTMLDivElement>
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [options]);
 
   return [elementRef, isVisible];
 };

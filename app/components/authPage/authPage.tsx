@@ -113,9 +113,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
       await saveUserToCookies(userCredential.user, idToken);
 
       router.push("/chat");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error de autenticación:', error);
-      alert(error.message);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(errorMessage);
     }
   };
 
@@ -129,9 +130,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
       await saveUserToCookies(result.user, idToken);
       
       router.push("/chat");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error con Google:', error);
-      alert(error.message);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(errorMessage);
     }
   };
 
@@ -145,9 +147,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
       await saveUserToCookies(result.user, idToken);
       
       router.push("/chat");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error con Facebook:', error);
-      alert(error.message);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(errorMessage);
     }
   };
 
