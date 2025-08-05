@@ -28,7 +28,6 @@ export async function sendToGemini(
 
     const contents = [];
     
-    // Construir contexto del usuario
     let contextInfo = '';
     
     if (userContext?.profile?.username) {
