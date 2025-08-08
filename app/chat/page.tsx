@@ -147,7 +147,7 @@ export default function ChatInterface() {
       setMessages((prev) => [...prev, { text: userMessage, sender: "user" }]);
       setNewMessage("");
 
-      if (messages.length === 0 || (messages.length <= 4 && (chatTitle === "Nuevo Chat" || chatTitle.startsWith("Chat")))) {
+      if (messages.length === 0 && chatTitle === "Nuevo Chat") {
         try {
           const aiGeneratedTitle = await generateChatTitle(userMessage);
           setChatTitle(aiGeneratedTitle);
