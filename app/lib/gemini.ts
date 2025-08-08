@@ -15,6 +15,75 @@ interface UserContext {
         dueDate?: string;
         category?: string;
     }>;
+    previousConversations?: Array<{
+        timestamp: string;
+        summary: string;
+        topic?: string;
+    }>;
+}
+
+export async function generateChatTitle(
+    firstMessage: string,
+    conversationContext?: string
+): Promise<string> {
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    
+    const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+
+    const prompt = `Genera un título corto y descriptivo (máximo 4 palabras) para un chat basado en este mensaje: "${firstMessage}"
+
+${conversationContext ? `Contexto adicional: ${conversationContext}` : ''}
+
+El título debe ser:
+- Conciso y claro
+- En español
+- Sin comillas
+- Descriptivo del tema principal
+- Máximo 4 palabras
+
+Ejemplos:
+- "Ayuda con Matemáticas"
+- "Consulta de Historia"
+- "Proyecto de Ciencias"
+- "Dudas de Programación"
+
+Título:`;
+
+    try {
+        const response = await fetch(`${endpoint}?key=${apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: prompt }]
+                }],
+                generationConfig: {
+                    temperature: 0.3,
+                    topK: 20,
+                    topP: 0.8,
+                    maxOutputTokens: 20,
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error en la API: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const generatedTitle = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        
+        if (generatedTitle) {
+            return generatedTitle.replace(/["']/g, '').substring(0, 50);
+        } else {
+            return firstMessage.length > 30 ? firstMessage.substring(0, 27) + "..." : firstMessage;
+        }
+    } catch (error) {
+        console.error('Error al generar título:', error);
+        return firstMessage.length > 30 ? firstMessage.substring(0, 27) + "..." : firstMessage;
+    }
 }
 
 export async function sendToGemini(
@@ -67,6 +136,18 @@ export async function sendToGemini(
         contextInfo += `- Ofrecer ayuda específica con sus tareas\n`;
         contextInfo += `- Sugerir organización y priorización\n`;
         contextInfo += `- Motivar según su progreso\n`;
+    }
+    
+    if (userContext?.previousConversations && userContext.previousConversations.length > 0) {
+        contextInfo += `\n💬 **Conversaciones previas del estudiante:**\n`;
+        userContext.previousConversations.slice(-3).forEach((conv, index) => {
+            const topic = conv.topic ? ` (${conv.topic})` : '';
+            contextInfo += `${index + 1}. ${conv.timestamp}${topic}: ${conv.summary}\n`;
+        });
+        contextInfo += `\n🧠 **Recuerda:**\n`;
+        contextInfo += `- Hacer referencia a conversaciones anteriores cuando sea relevante\n`;
+        contextInfo += `- Dar continuidad a temas previos\n`;
+        contextInfo += `- Mostrar que recuerdas el progreso del estudiante\n`;
     }
     
     const systemPrompt = `Eres Buho IA 🦉, un asistente súper inteligente y divertido que ayuda a estudiantes. Tu personalidad es:
