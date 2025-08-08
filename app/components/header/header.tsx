@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
 import { MessageCircle, Mic, ChevronDown, Play, Star, Check, Send, Brain, Zap } from "lucide-react";
+import Image from "next/image";
 
 const preguntasEjemplo = [
   {
@@ -21,7 +22,6 @@ const preguntasEjemplo = [
   },
 ];
 
-// Hook personalizado para detectar cuando un elemento está visible
 const useIntersectionObserver = (options = {}): [React.RefObject<HTMLDivElement | null>, boolean] => {
   const [isVisible, setIsVisible] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -30,7 +30,7 @@ const useIntersectionObserver = (options = {}): [React.RefObject<HTMLDivElement 
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setIsVisible(true);
-        observer.disconnect(); // Solo animar una vez
+        observer.disconnect();
       }
     }, {
       threshold: 0.1,
@@ -254,8 +254,14 @@ const Header: React.FC = () => {
               <div className={`relative transition-all duration-1000 delay-400 ${featuresSectionVisible ? 'animate-fade-in-left' : 'opacity-0 translate-x-8'}`}>
                 <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 border border-gray-700/50 rounded-xl p-6 space-y-4 shadow-2xl backdrop-blur-sm">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                      <span className="text-black font-bold text-sm">B</span>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center shadow-lg overflow-hidden">
+                      <Image 
+                        src="/logo.png" 
+                        alt="Buho IA Logo" 
+                        width={32} 
+                        height={32} 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div>
                       <div className="font-medium">Buho IA</div>
