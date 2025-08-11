@@ -30,6 +30,7 @@ const useIntersectionObserver = (options = {}): [React.RefObject<HTMLDivElement 
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setIsVisible(true);
+
         observer.disconnect();
       }
     }, {
@@ -50,11 +51,23 @@ const useIntersectionObserver = (options = {}): [React.RefObject<HTMLDivElement 
 
 const Header: React.FC = () => {
   const [activePregunta, setActivePregunta] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const [heroRef, heroVisible] = useIntersectionObserver();
   const [videoSectionRef, videoSectionVisible] = useIntersectionObserver();
   const [featuresSectionRef, featuresSectionVisible] = useIntersectionObserver();
   const [faqSectionRef, faqSectionVisible] = useIntersectionObserver();
+
+  useEffect(() => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  }, [isPlaying]);
 
   const scrollToSection = (sectionName: string) => {
     let targetElement: HTMLElement | null = null;
@@ -195,18 +208,27 @@ const Header: React.FC = () => {
               </p>
             </div>
 
-            <div className={`aspect-video bg-gray-900/50 border border-gray-800/50 rounded-xl overflow-hidden hover:border-amber-200/30 transition-all duration-1000 delay-300 backdrop-blur-sm ${videoSectionVisible ? 'animate-fade-in-scale' : 'opacity-0 scale-95'}`}>
-              <div className="h-full flex items-center justify-center">
+            <div className={`aspect-video bg-gray-900/50 border border-gray-800/50 rounded-xl overflow-hidden hover:border-amber-200/30 transition-all duration-1000 delay-300 backdrop-blur-sm relative ${videoSectionVisible ? 'animate-fade-in-scale' : 'opacity-0 scale-95'}`}>
+              <video 
+                ref={videoRef}
+                className="w-full h-full object-contain bg-black"
+                onClick={() => setIsPlaying(!isPlaying)}
+              >
+                <source src="/BUHO.mp4" type="video/mp4" />
+                Tu navegador no soporta el elemento video.
+              </video>
+              
+              <div 
+                className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 cursor-pointer ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
+                onClick={() => setIsPlaying(!isPlaying)}
+              >
                 <div className="text-center space-y-6">
                   <div className="w-16 h-16 border border-gray-700 rounded-full flex items-center justify-center mx-auto cursor-pointer hover:border-amber-200 hover:bg-amber-400/10 transition-all duration-300 group">
                     <Play className="w-6 h-6 text-gray-400 group-hover:text-amber-200 ml-0.5 transition-colors duration-300" />
                   </div>
-
                   <div>
-                    <h3 className="text-xl font-medium mb-2">
-                      Demo de Buho IA
-                    </h3>
-                    <p className="text-gray-500">Video próximamente</p>
+                    <h3 className="text-xl font-medium mb-2">Demo de Buho IA</h3>
+                    <p className="text-gray-500">Haz clic para reproducir</p>
                   </div>
                 </div>
               </div>
