@@ -297,11 +297,15 @@ const PrivacyPolicyPage: React.FC = () => {
                   </div>
 
                   {activeSection === section.id && (
-                    <div className="mt-6 space-y-4 border-t border-slate-700/50 pt-6 animate-in slide-in-from-top-2 duration-300">
+                    <div className="mt-6 space-y-4 border-t border-slate-700/50 pt-6 animate-in fade-in duration-[1000ms] ease-in-out">
                       {section.content.map((paragraph: string, pIndex: number) => (
-                        <div key={pIndex} className="flex items-start space-x-3 p-4 bg-slate-900/60 rounded-lg border border-slate-800/30 backdrop-blur-sm">
-                          <div className="w-2 h-2 rounded-full mt-2 bg-amber-500/60"></div>
-                          <p className="text-slate-300 leading-relaxed text-sm">
+                        <div 
+                          key={pIndex} 
+                          className="flex items-start space-x-3 p-4 bg-slate-900/60 rounded-lg border border-slate-800/30 backdrop-blur-sm transform transition-all duration-700 ease-in-out animate-in fade-in"
+                          style={{ animationDelay: `${pIndex * 200}ms` }}
+                        >
+                          <div className="w-2 h-2 rounded-full mt-2 bg-amber-500/40 transition-all duration-500 ease-in-out hover:bg-amber-400/60"></div>
+                          <p className="text-slate-300 leading-relaxed text-sm transition-colors duration-500 ease-in-out hover:text-slate-200">
                             {paragraph}
                           </p>
                         </div>
