@@ -85,7 +85,8 @@ export async function saveConversationSummary(userId: string, chatId: string, fi
       topic: topic,
       firstMessage: firstMessage,
       title: title,
-      summarizedAt: serverTimestamp()
+      summarizedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     });
     
     console.log(`Resumen guardado para chat ${chatId}: ${topic}`);

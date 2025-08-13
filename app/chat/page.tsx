@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, getDoc, query, orderBy, doc, updateDoc, } from "firebase/firestore";
+import { collection, getDocs, getDoc, query, orderBy, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../db/firebase";
 import Sidebar from "../components/sidebar/sidebar";
 import ProfileMenu from "../components/profileMenu/profileMenu";
@@ -147,21 +147,31 @@ export default function ChatInterface() {
       setMessages((prev) => [...prev, { text: userMessage, sender: "user" }]);
       setNewMessage("");
 
+      let finalChatTitle = chatTitle;
+      
       if (messages.length === 0 && chatTitle === "Nuevo Chat") {
         try {
           const aiGeneratedTitle = await generateChatTitle(userMessage);
+          finalChatTitle = aiGeneratedTitle;
           setChatTitle(aiGeneratedTitle);
 
           const chatRef = doc(db, "users", userId, "chats", currentChatId);
-          await updateDoc(chatRef, { title: aiGeneratedTitle });
+          await updateDoc(chatRef, { 
+            title: aiGeneratedTitle,
+            updatedAt: serverTimestamp()
+          });
         } catch (error) {
           console.error("Error al generar o actualizar el título del chat:", error);
           const fallbackTitle = userMessage.length > 30 ? userMessage.substring(0, 27) + "..." : userMessage;
+          finalChatTitle = fallbackTitle;
           setChatTitle(fallbackTitle);
           
           try {
             const chatRef = doc(db, "users", userId, "chats", currentChatId);
-            await updateDoc(chatRef, { title: fallbackTitle });
+            await updateDoc(chatRef, { 
+              title: fallbackTitle,
+              updatedAt: serverTimestamp()
+            });
           } catch (updateError) {
             console.error("Error al actualizar título de respaldo:", updateError);
           }
@@ -193,7 +203,7 @@ export default function ChatInterface() {
 
         if (messages.length <= 2) {
           try {
-            await saveConversationSummary(userId, currentChatId, userMessage, chatTitle);
+            await saveConversationSummary(userId, currentChatId, userMessage, finalChatTitle);
           } catch (error) {
             console.error("Error al guardar resumen de conversación:", error);
           }

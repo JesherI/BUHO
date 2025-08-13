@@ -85,6 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         
         snapshot.forEach((doc) => {
           const data = doc.data();
+          
           const updatedAt = data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt ? new Date(data.updatedAt) : null;
           
           // Calcular tiempo relativo
@@ -191,8 +192,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
-
-      console.log('Tarea agregada exitosamente');
     } catch (error) {
       console.error('Error al agregar tarea:', error);
     }
@@ -217,8 +216,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         completed: !task.completed,
         updatedAt: serverTimestamp()
       });
-
-      console.log('Estado de tarea actualizado exitosamente');
     } catch (error) {
       console.error('Error al actualizar tarea:', error);
     }
@@ -234,8 +231,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
       const taskRef = doc(db, "users", userId, "tasks", taskId);
       await deleteDoc(taskRef);
-
-      console.log('Tarea eliminada exitosamente:', taskId);
     } catch (error) {
       console.error('Error al eliminar tarea:', error);
     }
@@ -263,8 +258,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       });
 
       await updateDoc(taskRef, updateData);
-
-      console.log('Tarea actualizada exitosamente:', taskId);
     } catch (error) {
       console.error('Error al actualizar tarea:', error);
     }
@@ -280,7 +273,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   };
 
   const handleDeleteChat = async (chatId: string) => {
-    console.log('Eliminando chat:', chatId);
     try {
       if (!userId) {
         console.error('No hay usuario autenticado');
@@ -301,13 +293,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       );
       
       await Promise.all(deletePromises);
-      console.log(`Eliminados ${deletePromises.length} mensajes del chat ${chatId}`);
       
       // Luego eliminar el chat mismo
       const chatRef = doc(db, 'users', userId, 'chats', chatId);
       await deleteDoc(chatRef);
-      
-      console.log('Chat eliminado exitosamente de Firebase:', chatId);
       
       // Si el chat eliminado era el activo, redirigir a otro chat o crear uno nuevo
       if (isCurrentChat) {
