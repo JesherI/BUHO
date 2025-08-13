@@ -8,7 +8,7 @@ interface SidebarHeaderProps {
 
 const SidebarHeader: React.FC<SidebarHeaderProps> = ({ activeTab, setIsOpen }) => {
   return (
-    <div className="flex items-center justify-between p-4 border-b border-gray-800/30 bg-gray-950 min-w-[320px]">
+    <div className="flex items-center justify-between p-4 border-b border-gray-800/30 bg-black min-w-[320px]">
       <h2 className="text-lg font-normal text-gray-100 select-none">
         {activeTab === 'chats' ? 'Chats' : 'Agenda de Tareas'}
       </h2>

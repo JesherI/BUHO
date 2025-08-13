@@ -375,19 +375,67 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
   return (
     <>
-      <SidebarNav
-        sidebarItems={sidebarItems}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        urgentTasks={urgentTasks}
-      />
+      {/* Sidebar Navigation - Oculto en móviles */}
+      <div className="hidden lg:block">
+        <SidebarNav
+          sidebarItems={sidebarItems}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          urgentTasks={urgentTasks}
+        />
+      </div>
 
-      <div className={`fixed left-16 top-[72px] h-[calc(100vh-72px)] bg-black border-r border-gray-800/30 z-30 overflow-hidden shadow-2xl transition-all duration-300 ease-out ${
-        isOpen ? 'w-80 opacity-100 visible' : 'w-0 opacity-0 invisible'
-      }`}>
-        <SidebarHeader activeTab={activeTab} setIsOpen={setIsOpen} />
+      {/* Sidebar Content */}
+       <div className={`fixed top-[72px] h-[calc(100vh-72px)] bg-black border-r border-gray-800/30 z-30 overflow-hidden shadow-2xl transition-all duration-300 ease-out ${
+         isOpen 
+           ? 'left-0 lg:left-16 w-80 opacity-100 visible' 
+           : 'left-0 lg:left-16 w-0 opacity-0 invisible'
+       }`}>
+         <SidebarHeader activeTab={activeTab} setIsOpen={setIsOpen} />
+         
+         <div className="lg:hidden border-b border-gray-800/30 px-4 py-2">
+           <div className="flex space-x-1 bg-gray-900/50 rounded-lg p-1">
+             <button
+               onClick={() => setActiveTab('chats')}
+               className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                 activeTab === 'chats'
+                   ? 'bg-gray-700/70 text-white shadow-sm'
+                   : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
+               }`}
+             >
+               <MessageCircle size={16} />
+               <span>Chats</span>
+               {conversations.length > 0 && (
+                 <span className="bg-gray-600/80 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1.5">
+                   {conversations.length > 99 ? '99+' : conversations.length}
+                 </span>
+               )}
+             </button>
+             <button
+               onClick={() => setActiveTab('tasks')}
+               className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                 activeTab === 'tasks'
+                   ? 'bg-gray-700/70 text-white shadow-sm'
+                   : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
+               }`}
+             >
+               <CheckSquare size={16} />
+               <span>Tareas</span>
+               {pendingTasks > 0 && (
+                 <span className="bg-gray-600/80 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1.5">
+                   {pendingTasks > 99 ? '99+' : pendingTasks}
+                 </span>
+               )}
+               {urgentTasks > 0 && (
+                 <span className="bg-red-500/80 text-white text-xs rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1">
+                   !
+                 </span>
+               )}
+             </button>
+           </div>
+         </div>
 
         <CustomScrollbar>
           {activeTab === 'chats' && (
@@ -441,7 +489,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/30 z-20 lg:hidden cursor-pointer"
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden cursor-pointer backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
