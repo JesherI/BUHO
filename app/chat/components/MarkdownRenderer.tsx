@@ -60,33 +60,33 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
       const code = language ? lines.slice(1).join('\n') : codeContent;
       
       return (
-        <div key={index} className="relative group my-4">
+        <div key={index} className="relative group my-3 sm:my-4">
           <div className="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-2xl">
-            <div className="flex items-center justify-between bg-gray-900/50 px-4 py-2 border-b border-gray-800">
-              <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">
+            <div className="flex items-center justify-between bg-gray-900/50 px-3 sm:px-4 py-2 border-b border-gray-800">
+              <span className="text-gray-400 text-xs font-medium uppercase tracking-wide truncate">
                 {language || 'código'}
               </span>
               <button
                 onClick={() => copyToClipboard(code, index)}
-                className="flex items-center gap-1.5 px-2 py-1 text-xs text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 rounded-md transition-all duration-200 opacity-0 group-hover:opacity-100"
+                className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-1 text-xs text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 rounded-md transition-all duration-200 opacity-0 group-hover:opacity-100 flex-shrink-0"
                 title="Copiar código"
               >
                 {copiedIndex === index ? (
                   <>
                     <Check size={12} className="text-green-400" />
-                    <span className="text-green-400">Copiado</span>
+                    <span className="text-green-400 hidden sm:inline">Copiado</span>
                   </>
                 ) : (
                   <>
                     <Copy size={12} />
-                    <span>Copiar</span>
+                    <span className="hidden sm:inline">Copiar</span>
                   </>
                 )}
               </button>
             </div>
             {/* Contenido del código */}
-            <pre className="p-4 overflow-x-auto bg-black text-gray-100">
-              <code className="text-sm font-mono leading-relaxed">{code}</code>
+            <pre className="p-3 sm:p-4 overflow-x-auto bg-black text-gray-100 text-xs sm:text-sm">
+              <code className="font-mono leading-relaxed whitespace-pre">{code}</code>
             </pre>
           </div>
         </div>
@@ -107,11 +107,11 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
           i++;
         }
         elements.push(
-          <ul key={`ul-${index}-${i}`} className="list-none my-3 space-y-1">
+          <ul key={`ul-${index}-${i}`} className="list-none my-2 sm:my-3 space-y-1">
             {listItems.map((item, itemIndex) => (
               <li key={itemIndex} className="flex items-start gap-2">
-                <span className="text-blue-400 mt-1.5 text-xs">•</span>
-                <span className="text-gray-100 leading-relaxed">{renderInline(item)}</span>
+                <span className="text-blue-400 mt-1.5 text-xs flex-shrink-0">•</span>
+                <span className="text-gray-100 leading-relaxed break-words">{renderInline(item)}</span>
               </li>
             ))}
           </ul>
@@ -125,11 +125,11 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
           i++;
         }
         elements.push(
-          <ol key={`ol-${index}-${i}`} className="list-none my-3 space-y-1">
+          <ol key={`ol-${index}-${i}`} className="list-none my-2 sm:my-3 space-y-1">
             {listItems.map((item, itemIndex) => (
               <li key={itemIndex} className="flex items-start gap-2">
-                <span className="text-blue-400 mt-1.5 text-xs font-medium min-w-[1.2rem]">{itemIndex + 1}.</span>
-                <span className="text-gray-100 leading-relaxed">{renderInline(item)}</span>
+                <span className="text-blue-400 mt-1.5 text-xs font-medium min-w-[1.2rem] flex-shrink-0">{itemIndex + 1}.</span>
+                <span className="text-gray-100 leading-relaxed break-words">{renderInline(item)}</span>
               </li>
             ))}
           </ol>
@@ -138,7 +138,7 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
       }
       if (line.trim()) {
         elements.push(
-          <p key={`p-${index}-${i}`} className="my-2 text-gray-100 leading-relaxed">
+          <p key={`p-${index}-${i}`} className="my-1.5 sm:my-2 text-gray-100 leading-relaxed break-words">
             {renderInline(line)}
           </p>
         );
@@ -154,7 +154,7 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
 
   const parts = content.split(/(```[\s\S]*?```)/g);
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert max-w-none overflow-hidden">
       {parts.map(renderPart)}
     </div>
   );

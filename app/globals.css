@@ -5,9 +5,6 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -195,5 +192,76 @@ html {
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* Clases para responsividad y safe areas */
+.safe-area-inset {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Mejoras para dispositivos móviles */
+@media (max-width: 640px) {
+  /* Prevenir zoom en inputs en iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Mejorar el scroll en dispositivos táctiles */
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevenir selección de texto en botones */
+  button {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Mejoras para el contenido de código en móviles */
+@media (max-width: 640px) {
+  pre {
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+  
+  code {
+    word-break: break-all;
+    white-space: pre-wrap;
+  }
+}
+
+/* Mejoras para el viewport en dispositivos móviles */
+@supports (height: 100dvh) {
+  .h-screen {
+    height: 100dvh;
+  }
+}
+
+/* Mejoras para el contraste en pantallas pequeñas */
+@media (max-width: 640px) {
+  .border-gray-800 {
+    border-color: rgb(55 65 81) !important;
+  }
+  
+  .border-gray-900 {
+    border-color: rgb(17 24 39) !important;
   }
 }

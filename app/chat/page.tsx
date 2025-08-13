@@ -246,19 +246,19 @@ export default function ChatInterface() {
           </Navbar>
         </div>
 
-        <div className="flex-1 flex flex-col min-h-0 pt-16 transition-all duration-300">
+        <div className="flex-1 flex flex-col min-h-0 pt-16 transition-all duration-300 safe-area-inset">
           {messages.length === 0 && (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center space-y-6 max-w-md px-4">
-                <div className="w-20 h-20 mx-auto bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-lg">
-                  <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <div className="flex-1 flex items-center justify-center px-4 py-8">
+              <div className="text-center space-y-4 sm:space-y-6 max-w-md w-full">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-lg">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
                 </div>
-                <h1 className="text-2xl font-semibold text-white">¡Hola! ¿En qué puedo ayudarte hoy?</h1>
-                <p className="text-gray-400 text-sm">Escribe tu mensaje para comenzar una conversación con el asistente</p>
-                <div className="pt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
+                <h1 className="text-xl sm:text-2xl font-semibold text-white px-2">¡Hola! ¿En qué puedo ayudarte hoy?</h1>
+                <p className="text-gray-400 text-xs sm:text-sm px-2">Escribe tu mensaje para comenzar una conversación con el asistente</p>
+                <div className="pt-2 sm:pt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-left">
                     {[
                       "¿Cómo puedo mejorar mi productividad?",
                       "Dame ideas para mi próximo proyecto",
@@ -267,7 +267,7 @@ export default function ChatInterface() {
                     ].map((suggestion, index) => (
                       <button
                         key={index}
-                        className="bg-black/50 hover:bg-gray-900 text-left px-4 py-3 rounded-xl text-sm text-white transition-colors border border-gray-800"
+                        className="bg-black/50 hover:bg-gray-900 text-left px-3 py-2 sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm text-white transition-colors border border-gray-800 break-words"
                         onClick={() => {
                           setNewMessage(suggestion);
                           setTimeout(() => {
