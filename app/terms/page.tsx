@@ -27,7 +27,7 @@ const TermsOfUsePage: React.FC = () => {
 
   const sections = [
     {
-      id: 'aceptacion',
+      id: 'aceptación',
       title: 'Aceptación de Términos',
       icon: Scale,
       summary: 'Al usar BUHO IA, aceptas estos términos y condiciones.',
@@ -41,7 +41,7 @@ const TermsOfUsePage: React.FC = () => {
       ]
     },
     {
-      id: 'descripcion',
+      id: 'descripción',
       title: 'Descripción del Servicio',
       icon: Cpu,
       summary: 'Plataforma de IA para asistencia y automatización de tareas.',

@@ -111,12 +111,12 @@ const HelpCenter = () => {
         },
         {
             id: "integrations",
-            title: "Integrar Buho AI con otras aplicaciones",
+            title: "Integrar Búho AI con otras aplicaciones",
             views: "756 visualizaciones",
             time: "8 min de lectura",
             category: "advanced-features",
             summary:
-                "Descubre cómo conectar Buho AI con tus aplicaciones favoritas como Microsoft Office, Google Workspace y Slack. Sigue pasos claros para autenticar y configurar integraciones que mejoren tu productividad.",
+                "Descubre cómo conectar Búho AI con tus aplicaciones favoritas como Microsoft Office, Google Workspace y Slack. Sigue pasos claros para autenticar y configurar integraciones que mejoren tu productividad.",
         },
         {
             id: "troubleshooting",
