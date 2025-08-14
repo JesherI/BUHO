@@ -51,9 +51,21 @@ export async function sendToGemini(
     try {
         if (provider === AI_PROVIDERS.ZAI) {
             const response = await sendToZai(message, conversationHistory, userContext);
+            // Verificar si Z.ai devolvió una respuesta válida
+            if (!response || response.trim() === '' || response.includes('Sin texto de respuesta')) {
+                // Si Z.ai no devuelve respuesta válida, intentar con Gemini
+                const fallbackResponse = await sendToGeminiOriginal(message, conversationHistory, userContext);
+                return fallbackResponse;
+            }
             return response;
         } else {
             const response = await sendToGeminiOriginal(message, conversationHistory, userContext);
+            // Verificar si Gemini devolvió una respuesta válida
+            if (!response || response.trim() === '' || response.includes('Sin texto de respuesta') || response.includes('no devolvió')) {
+                // Si Gemini no devuelve respuesta válida, intentar con Z.ai
+                const fallbackResponse = await sendToZai(message, conversationHistory, userContext);
+                return fallbackResponse;
+            }
             return response;
         }
     } catch {
