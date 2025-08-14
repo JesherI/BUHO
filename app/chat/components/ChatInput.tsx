@@ -116,7 +116,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ newMessage, setNewMessage, sendMe
       <div className="w-full px-3 sm:px-4 py-3 sm:py-4">
         <div className="relative max-w-3xl mx-auto">
           <div className="flex items-end gap-1 sm:gap-2 bg-black/90 backdrop-blur-md rounded-2xl p-2 shadow-lg border border-gray-900">
-            <div className="flex-1 min-h-[70px] max-h-32 overflow-hidden">
+            <div className="flex-1 max-h-22 overflow-hidden">
               <textarea
                 ref={textareaRef}
                 className="w-full bg-transparent text-white placeholder-gray-400 resize-none px-2 sm:px-3 py-2 focus:outline-none text-sm leading-relaxed overflow-y-auto"

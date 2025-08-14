@@ -17,10 +17,165 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
     }
   };
 
+  const renderCodeWithSyntaxHighlight = (code: string) => {
+    // Patrones para diferentes elementos de sintaxis
+    const patterns = {
+      // Comentarios
+      comment: /(\/\/.*$|\/\*[\s\S]*?\*\/|#.*$|<!--[\s\S]*?-->)/gm,
+      // Strings
+      string: /(["'`])(?:(?!\1)[^\\]|\\.)*\1/g,
+      // Números
+      number: /\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b/g,
+      // Palabras clave comunes
+      keyword: new RegExp(
+        '\\b(' +
+        'function|const|let|var|if|else|for|while|return|class|import|export|from|as|default|' +
+        'async|await|try|catch|finally|throw|new|this|super|extends|implements|interface|type|' +
+        'enum|public|private|protected|static|abstract|readonly|namespace|module|declare|' +
+        'void|null|undefined|true|false|boolean|string|number|object|any|unknown|never' +
+        ')\\b',
+        'g'
+      ),
+      // Operadores
+      operator: /[+\-*/%=<>!&|^~?:]/g,
+      // Paréntesis y llaves
+      // oxlint-disable-next-line no-useless-escape
+      bracket: /[()\[\]{}]/g,
+      // Funciones (palabra seguida de paréntesis)
+      functionCall: /\b([a-zA-Z_$][a-zA-Z0-9_$]*)(?=\s*\()/g,
+      // Variables y propiedades
+      variable: /\b[a-zA-Z_$][a-zA-Z0-9_$]*\b/g
+    };
+
+    let highlightedCode = code;
+    const replacements: Array<{ start: number, end: number, replacement: string }> = [];
+
+    // Procesar comentarios
+    let match;
+    while ((match = patterns.comment.exec(code)) !== null) {
+      replacements.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        replacement: `<span style="color: #228B22; font-style: italic;">${match[0]}</span>`
+      });
+    }
+
+    // Procesar strings
+    patterns.string.lastIndex = 0;
+    while ((match = patterns.string.exec(code)) !== null) {
+      if (!isInsideReplacement(match.index, replacements)) {
+        replacements.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          replacement: `<span style="color: #FF1493;">${match[0]}</span>`
+        });
+      }
+    }
+
+    // Procesar números
+    patterns.number.lastIndex = 0;
+    while ((match = patterns.number.exec(code)) !== null) {
+      if (!isInsideReplacement(match.index, replacements)) {
+        replacements.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          replacement: `<span style="color: #0066FF;">${match[0]}</span>`
+        });
+      }
+    }
+
+    // Procesar palabras clave
+    patterns.keyword.lastIndex = 0;
+    while ((match = patterns.keyword.exec(code)) !== null) {
+      if (!isInsideReplacement(match.index, replacements)) {
+        replacements.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          replacement: `<span style="color: #8A2BE2; font-weight: 600;">${match[0]}</span>`
+        });
+      }
+    }
+
+    // Procesar llamadas a funciones
+    patterns.functionCall.lastIndex = 0;
+    while ((match = patterns.functionCall.exec(code)) !== null) {
+      if (!isInsideReplacement(match.index, replacements)) {
+        replacements.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          replacement: `<span style="color: #FFD700; font-weight: 500;">${match[0]}</span>`
+        });
+      }
+    }
+
+    // Procesar operadores
+    patterns.operator.lastIndex = 0;
+    while ((match = patterns.operator.exec(code)) !== null) {
+      if (!isInsideReplacement(match.index, replacements)) {
+        replacements.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          replacement: `<span style="color: #FF4500;">${match[0]}</span>`
+        });
+      }
+    }
+
+    // Procesar paréntesis y llaves
+    patterns.bracket.lastIndex = 0;
+    while ((match = patterns.bracket.exec(code)) !== null) {
+      if (!isInsideReplacement(match.index, replacements)) {
+        const colors = {
+          '(': '#00CED1', ')': '#00CED1',
+          '[': '#DC143C', ']': '#DC143C',
+          '{': '#4B0082', '}': '#4B0082'
+        };
+        const color = colors[match[0] as keyof typeof colors] || '#32CD32';
+        replacements.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          replacement: `<span style="color: ${color}; font-weight: 600;">${match[0]}</span>`
+        });
+      }
+    }
+
+    // Aplicar reemplazos en orden inverso para mantener índices correctos
+    replacements.sort((a, b) => b.start - a.start);
+
+    for (const replacement of replacements) {
+      highlightedCode =
+        highlightedCode.slice(0, replacement.start) +
+        replacement.replacement +
+        highlightedCode.slice(replacement.end);
+    }
+
+    return <span dangerouslySetInnerHTML={{ __html: highlightedCode }} />;
+  };
+
+  const isInsideReplacement = (index: number, replacements: Array<{ start: number, end: number, replacement: string }>) => {
+    return replacements.some(r => index >= r.start && index < r.end);
+  };
+
   const renderInline = (text: string) => {
-    const segments = text.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`|~~.*?~~|\[.*?\]\(.*?\))/g).filter(Boolean);
+    // Primero procesamos las etiquetas <br> para convertirlas en saltos de línea
+    const textWithBreaks = text.replace(/<br\s*\/?>/gi, '\n');
+
+    const segments = textWithBreaks.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`|~~.*?~~|\[.*?\]\(.*?\))/g).filter(Boolean);
 
     return segments.map((segment, i) => {
+      // Manejar saltos de línea
+      if (segment.includes('\n')) {
+        const lines = segment.split('\n');
+        return (
+          <Fragment key={i}>
+            {lines.map((line, lineIndex) => (
+              <Fragment key={lineIndex}>
+                {line}
+                {lineIndex < lines.length - 1 && <br />}
+              </Fragment>
+            ))}
+          </Fragment>
+        );
+      }
       // Negrita
       if (segment.startsWith("**") && segment.endsWith("**")) {
         return <strong key={i}>{segment.slice(2, -2)}</strong>;
@@ -196,7 +351,7 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
             </div>
             {/* Contenido del código */}
             <pre className="p-3 sm:p-4 overflow-x-auto bg-black text-gray-100 text-xs sm:text-sm">
-              <code className="font-mono leading-relaxed whitespace-pre">{code}</code>
+              <code className="font-mono leading-relaxed whitespace-pre">{renderCodeWithSyntaxHighlight(code)}</code>
             </pre>
           </div>
         </div>
