@@ -16,7 +16,10 @@ export function analyzeDifficulty(message: string): DifficultyLevel {
         'investigación', 'hipótesis', 'tesis', 'ensayo académico', 'paper',
         'diferencias entre', 'ventajas y desventajas', 'pros y contras',
         'implicaciones', 'consecuencias', 'causas y efectos', 'factores',
-        'perspectiva crítica', 'punto de vista', 'enfoque multidisciplinario'
+        'perspectiva crítica', 'punto de vista', 'enfoque multidisciplinario', 'análisis crítico',
+        'análisis de datos', 'estadística', 'modelo', 'simulación', 'proyecto', 'proyecto de investigación',
+        'investigación científica', 'investigación experimental', 'investigación teórica', 'investigación aplicada',
+        'investigación social', 'investigación política', 'investigación económica', 'investigación ambiental'
     ];
 
     // Palabras clave para preguntas medianas

@@ -57,6 +57,7 @@ export function buildContextInfo(userContext?: UserContext): string {
     return contextInfo;
 }
 
+// Asignacion de personalidad y estilo al asistente IA
 export function buildSystemPrompt(contextInfo: string): string {
     return `Eres Buho IA 🦉, asistente inteligente y divertido para estudiantes.
 
@@ -78,6 +79,7 @@ export function enhanceMessageForComplexReasoning(message: string): string {
         message.toLowerCase().includes(keyword)
     );
 
+    // Si se detectan palabras clave que sugieren razonamiento complejo, se añade la indicación
     if (needsComplexReasoning) {
         return `${message}\n\n[Explica paso a paso 🤔✨]`;
     }
