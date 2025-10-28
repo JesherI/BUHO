@@ -8,19 +8,19 @@ const Footer: React.FC = () => {
         <div>
           <h3 className="text-white font-semibold mb-2">Búho</h3>
           <ul>
-            <li><Link href="#" className="hover:underline">Acerca de</Link></li>
+            <li><Link href="#" className="hover:underline">Acerca de: </Link></li>
           </ul>
         </div>
         <div>
-          <h3 className="text-white font-semibold mb-2">Plataforma</h3>
+          <h3 className="text-white font-semibold mb-2">Plataformas</h3>
           <ul>
-            <li><Link href="#" className="hover:underline">Proximamente</Link></li>
+            <li><Link href="#" className="hover:underline">Proximamente!!</Link></li>
           </ul>
         </div>
         <div>
           <h3 className="text-white font-semibold mb-2">Recursos</h3>
           <ul>
-            <li><Link href="/help" className="hover:underline">Centro de ayuda</Link></li>
+            <li><Link href="/help" className="hover:underline">Centro de ayuda!</Link></li>
           </ul>
         </div>
         <div>

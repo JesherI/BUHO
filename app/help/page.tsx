@@ -708,7 +708,6 @@ const HelpCenter = () => {
                     </div>
                 </div>
             </div>
-
             <footer className="bg-black border-t border-gray-800 py-8 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <div className="flex items-center justify-center mb-4">
