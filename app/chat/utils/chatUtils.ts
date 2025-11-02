@@ -9,6 +9,10 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../../db/firebase";
+import { encrypt, decrypt } from "../../lib/encryptionService";
+
+// Clave de encriptación para mensajes (en una aplicación real, esto debería estar en un lugar seguro)
+const MESSAGE_ENCRYPTION_KEY = "BUHO_SECURE_ENCRYPTION_KEY_2024";
 
 export async function getOrCreateChat(title: string, category: string, userId: string, forceNew: boolean = false) {
   try {
@@ -41,9 +45,15 @@ export async function saveMessage(userId: string, chatId: string, text: string, 
   try {
     const messagesRef = collection(db, "users", userId, "chats", chatId, "messages");
     
+    // Encriptar el texto del mensaje
+    const { ciphertext, iv, key } = await encrypt(text, MESSAGE_ENCRYPTION_KEY);
+    
     const docRef = await addDoc(messagesRef, {
-      text,
+      encryptedText: ciphertext,
+      iv: iv,
+      text: text.substring(0, 10) + "...", // Guardamos una versión truncada en texto plano para referencia
       sender,
+      encrypted: true,
       timestamp: serverTimestamp(),
     });
     
@@ -78,7 +88,7 @@ export async function saveConversationSummary(userId: string, chatId: string, fi
     } else if (lowerMessage.includes("programación") || lowerMessage.includes("código") || lowerMessage.includes("javascript")) {
       topic = "Programación";
     }
-
+    
     const chatRef = doc(db, "users", userId, "chats", chatId);
     await updateDoc(chatRef, {
       summary: firstMessage.length > 100 ? firstMessage.substring(0, 97) + "..." : firstMessage,
@@ -93,6 +103,69 @@ export async function saveConversationSummary(userId: string, chatId: string, fi
   } catch (error) {
     console.error("Error al guardar resumen de conversación:", error);
     throw error;
+  }
+}
+
+/**
+ * Función para obtener y descifrar mensajes de un chat
+ * @param userId ID del usuario
+ * @param chatId ID del chat
+ * @returns Array de mensajes descifrados
+ */
+export async function getDecryptedMessages(userId: string, chatId: string) {
+  try {
+    const messagesRef = collection(db, "users", userId, "chats", chatId, "messages");
+    const q = query(messagesRef);
+    const messagesSnapshot = await getDocs(q);
+    
+    const messages = [];
+    
+    for (const messageDoc of messagesSnapshot.docs) {
+      const messageData = messageDoc.data();
+      
+      // Verificar si el mensaje está encriptado
+      if (messageData.encrypted && messageData.encryptedText && messageData.iv) {
+        try {
+          // Descifrar el mensaje
+          const decryptedText = await decrypt(
+            messageData.encryptedText,
+            messageData.iv,
+            MESSAGE_ENCRYPTION_KEY
+          );
+          
+          messages.push({
+            text: decryptedText,
+            sender: messageData.sender,
+            timestamp: messageData.timestamp
+          });
+        } catch (decryptError) {
+          console.error("Error al descifrar mensaje:", decryptError);
+          // Si hay error al descifrar, usar el texto truncado
+          messages.push({
+            text: messageData.text || "[Mensaje encriptado]",
+            sender: messageData.sender,
+            timestamp: messageData.timestamp
+          });
+        }
+      } else {
+        // Mensaje no encriptado (compatibilidad con mensajes antiguos)
+        messages.push({
+          text: messageData.text,
+          sender: messageData.sender,
+          timestamp: messageData.timestamp
+        });
+      }
+    }
+    
+    // Ordenar mensajes por timestamp
+    return messages.sort((a, b) => {
+      const timeA = a.timestamp?.toDate?.() || new Date(0);
+      const timeB = b.timestamp?.toDate?.() || new Date(0);
+      return timeA.getTime() - timeB.getTime();
+    });
+  } catch (error) {
+    console.error("Error al obtener mensajes:", error);
+    return [];
   }
 }
 

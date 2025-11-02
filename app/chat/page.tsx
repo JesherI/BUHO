@@ -12,7 +12,7 @@ import ProfileCard from "../profile/ProfileCard";
 import { sendToGemini, generateChatTitle } from "../lib/gemini";
 import ChatMessages from "./components/ChatMessages";
 import ChatInput from "./components/ChatInput";
-import { getOrCreateChat, saveMessage, saveConversationSummary } from "./utils/chatUtils";
+import { getOrCreateChat, saveMessage, saveConversationSummary, getDecryptedMessages } from "./utils/chatUtils";
 import { getUserContext } from "./utils/userContext";
 
 
@@ -114,19 +114,9 @@ export default function ChatInterface() {
           window.history.replaceState(null, '', `/chat?id=${chatId}`);
         }
 
-        const messagesRef = collection(db, "users", userId, "chats", chatId, "messages");
-        const q = query(messagesRef, orderBy("timestamp", "asc"));
-        const messagesSnapshot = await getDocs(q);
-        const loadedMessages = messagesSnapshot.docs.map(doc => doc.data());
-
-        const sortedMessages = loadedMessages
-          .filter(msg => msg.text && msg.sender)
-          .map(msg => ({
-            text: msg.text,
-            sender: msg.sender
-          }));
-
-        setMessages(sortedMessages);
+        // Usar la nueva función para obtener mensajes descifrados
+        const decryptedMessages = await getDecryptedMessages(userId, chatId);
+        setMessages(decryptedMessages);
       } catch (error) {
         console.error("Error al inicializar el chat:", error);
       } finally {
