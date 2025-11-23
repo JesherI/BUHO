@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import CookieBanner from "./components/CookieBanner";
+import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 
 
 
@@ -18,6 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BUHO",
   description: "Create By DEV-09",
+  manifest: "/manifest.webmanifest"
 };
 
 export default function RootLayout({
@@ -32,6 +34,8 @@ export default function RootLayout({
       >
         {children}
         <CookieBanner />
+        <link rel="apple-touch-icon" href="/icons/icon-180.png" />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
