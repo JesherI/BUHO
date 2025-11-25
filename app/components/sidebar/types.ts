@@ -17,7 +17,7 @@ export interface Conversation {
 }
 
 export interface SidebarItem {
-  id: 'toggle' | 'chats' | 'tasks'; 
+  id: 'toggle' | 'chats' | 'tasks' | 'courses'; 
   icon: React.ComponentType<{ size?: number; className?: string }>;
   label: string;
   count?: number;

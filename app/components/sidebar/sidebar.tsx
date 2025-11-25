@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { MessageCircle, CheckSquare, Menu } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import { collection, query, orderBy, onSnapshot, Timestamp, doc, deleteDoc, getDocs, addDoc, updateDoc, serverTimestamp, FieldValue } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../../db/firebase';
+import { useRouter } from 'next/navigation';
 
 import { SidebarProps, SidebarItem, Task, Conversation } from './types';
 
@@ -17,6 +19,7 @@ import AddTaskModal from './AddTaskModal';
 
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
+  const router = useRouter();
   React.useEffect(() => {
     const link = document.createElement('link');
     document.head.appendChild(link);
@@ -27,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       document.head.removeChild(link);
     };
   }, []);
-  const [activeTab, setActiveTab] = useState<'chats' | 'tasks'>('chats');
+  const [activeTab, setActiveTab] = useState<'chats' | 'tasks' | 'courses'>('chats');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
@@ -58,6 +61,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       return unsubscribe;
     }
   }, [userId]);
+
+  useEffect(() => {
+    const path = typeof window !== 'undefined' ? window.location.pathname : '';
+    if (path.startsWith('/cursos')) {
+      setActiveTab('courses');
+    } else if (path.startsWith('/chat')) {
+      setActiveTab('chats');
+    }
+  }, []);
 
   // Efecto para cargar tareas cuando cambie el userId
   useEffect(() => {
@@ -265,11 +277,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   
   // Función para crear un nuevo chat
   const createNewChat = () => {
-    // Redirigir a la página de chat sin ID para crear uno nuevo sin recargar
-    window.history.pushState(null, '', '/chat');
-    // Disparar evento de navegación para que el componente de chat se actualice
-    window.dispatchEvent(new PopStateEvent('popstate'));
-    window.dispatchEvent(new CustomEvent('urlchange'));
+    router.push('/chat');
+    setIsOpen(false);
   };
 
   const handleDeleteChat = async (chatId: string) => {
@@ -304,16 +313,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         const otherChat = conversations.find(conv => conv.id !== chatId);
         
         if (otherChat) {
-          // Redirigir al primer chat disponible sin recargar la página
-          window.history.pushState(null, '', `/chat?id=${otherChat.id}`);
-          // Disparar evento de navegación para que el componente de chat se actualice
-          window.dispatchEvent(new PopStateEvent('popstate'));
-          window.dispatchEvent(new CustomEvent('urlchange'));
+          router.push(`/chat?id=${otherChat.id}`);
         } else {
-          // Si no hay otros chats, ir a la página de chat para crear uno nuevo
-          window.history.pushState(null, '', '/chat');
-          window.dispatchEvent(new PopStateEvent('popstate'));
-          window.dispatchEvent(new CustomEvent('urlchange'));
+          router.push('/chat');
         }
       }
       
@@ -359,6 +361,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     { id: 'toggle', icon: Menu, label: 'Ocultar' },
     { id: 'chats', icon: MessageCircle, label: 'Chats', count: conversations.length },
     { id: 'tasks', icon: CheckSquare, label: 'Tareas', count: pendingTasks },
+    { id: 'courses', icon: BookOpen, label: 'Cursos' },
   ];
   
 
@@ -384,47 +387,58 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
        }`}>
          <SidebarHeader activeTab={activeTab} setIsOpen={setIsOpen} />
          
-         <div className="lg:hidden border-b border-gray-800/30 px-4 py-2">
-           <div className="flex space-x-1 bg-gray-900/50 rounded-lg p-1">
-             <button
-               onClick={() => setActiveTab('chats')}
-               className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
-                 activeTab === 'chats'
-                   ? 'bg-gray-700/70 text-white shadow-sm'
-                   : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
-               }`}
-             >
-               <MessageCircle size={16} />
-               <span>Chats</span>
-               {conversations.length > 0 && (
-                 <span className="bg-gray-600/80 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1.5">
-                   {conversations.length > 99 ? '99+' : conversations.length}
-                 </span>
-               )}
-             </button>
-             <button
-               onClick={() => setActiveTab('tasks')}
-               className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
-                 activeTab === 'tasks'
-                   ? 'bg-gray-700/70 text-white shadow-sm'
-                   : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
-               }`}
-             >
-               <CheckSquare size={16} />
-               <span>Tareas</span>
-               {pendingTasks > 0 && (
-                 <span className="bg-gray-600/80 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1.5">
-                   {pendingTasks > 99 ? '99+' : pendingTasks}
-                 </span>
-               )}
-               {urgentTasks > 0 && (
-                 <span className="bg-red-500/80 text-white text-xs rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1">
-                   !
-                 </span>
-               )}
-             </button>
-           </div>
-         </div>
+        <div className="lg:hidden border-b border-gray-800/30 px-2 py-2 overflow-x-auto">
+          <div className="inline-flex items-center gap-0.5 bg-gray-900/50 rounded-lg p-1 whitespace-nowrap">
+            <button
+              onClick={() => setActiveTab('chats')}
+              className={`flex-none flex items-center justify-center gap-1 py-2 px-2 rounded-md text-sm font-medium transition-all duration-200 min-w-[100px] ${
+                activeTab === 'chats'
+                  ? 'bg-gray-700/70 text-white shadow-sm'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
+              }`}
+            >
+              <MessageCircle size={16} />
+              <span>Chats</span>
+              {conversations.length > 0 && (
+                <span className="bg-gray-600/80 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1.5">
+                  {conversations.length > 99 ? '99+' : conversations.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('tasks')}
+              className={`flex-none flex items-center justify-center gap-1 py-2 px-2 rounded-md text-sm font-medium transition-all duration-200 min-w-[100px] ${
+                activeTab === 'tasks'
+                  ? 'bg-gray-700/70 text-white shadow-sm'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
+              }`}
+            >
+              <CheckSquare size={16} />
+              <span>Tareas</span>
+              {pendingTasks > 0 && (
+                <span className="bg-gray-600/80 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1.5">
+                  {pendingTasks > 99 ? '99+' : pendingTasks}
+                </span>
+              )}
+              {urgentTasks > 0 && (
+                <span className="bg-red-500/80 text-white text-xs rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1">
+                  !
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => { router.push('/cursos'); setIsOpen(false); }}
+              className={`flex-none flex items-center justify-center gap-1 py-2 px-2 rounded-md text-sm font-medium transition-all duration-200 min-w-[100px] ${
+                activeTab === 'courses'
+                  ? 'bg-gray-700/70 text-white shadow-sm'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
+              }`}
+            >
+              <BookOpen size={16} />
+              <span>Cursos</span>
+            </button>
+          </div>
+        </div>
 
         <CustomScrollbar>
           {activeTab === 'chats' && (
@@ -441,9 +455,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                   conversations={conversations} 
                   onNewChat={createNewChat} 
                   onSelectChat={(chatId) => {
-                    window.history.pushState(null, '', `/chat?id=${chatId}`);
-                    window.dispatchEvent(new PopStateEvent('popstate'));
-                    window.dispatchEvent(new CustomEvent('urlchange'));
+                    router.push(`/chat?id=${chatId}`);
+                    setIsOpen(false);
                   }}
                   onDeleteChat={handleDeleteChat}
                 />
@@ -473,6 +486,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
               isTaskOverdue={isTaskOverdue}
             />
           )}
+
         </CustomScrollbar>
       </div>
 

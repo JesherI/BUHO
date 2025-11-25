@@ -1,10 +1,13 @@
+'use client';
+
 import React from 'react';
 import { SidebarItem } from './types';
+import { useRouter } from 'next/navigation';
 
 interface SidebarNavProps {
   sidebarItems: SidebarItem[];
-  activeTab: 'chats' | 'tasks';
-  setActiveTab: (tab: 'chats' | 'tasks') => void;
+  activeTab: 'chats' | 'tasks' | 'courses';
+  setActiveTab: (tab: 'chats' | 'tasks' | 'courses') => void;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   urgentTasks: number;
@@ -18,11 +21,12 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   setIsOpen,
   urgentTasks
 }) => {
+  const router = useRouter();
   return (
     <div className="fixed left-0 top-[72px] h-[calc(100vh-72px)] w-16 bg-black border-r border-gray-800/30 z-40 flex flex-col py-3 shadow-xl">
       {sidebarItems.map((item) => {
         const IconComponent = item.icon;
-        const isActive = activeTab === item.id;
+        const isActive = activeTab === (item.id as 'chats' | 'tasks' | 'courses');
         
         return (
           <button
@@ -30,8 +34,14 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
             onClick={() => {
               if (item.id === 'toggle') {
                 setIsOpen(!isOpen);
+              } else if (item.id === 'courses') {
+                router.push('/cursos');
+                setIsOpen(false);
+              } else if (item.id === 'chats') {
+                setActiveTab('chats');
+                setIsOpen(true);
               } else {
-                setActiveTab(item.id as 'chats' | 'tasks');
+                setActiveTab(item.id as 'chats' | 'tasks' | 'courses');
                 setIsOpen(true);
               }
             }}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, getDoc, query, orderBy, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../db/firebase";
@@ -12,7 +12,7 @@ import ProfileCard from "../profile/ProfileCard";
 import { sendToGemini, generateChatTitle } from "../lib/gemini";
 import ChatMessages from "./components/ChatMessages";
 import ChatInput from "./components/ChatInput";
-import { getOrCreateChat, saveMessage, saveConversationSummary } from "./utils/chatUtils";
+import { saveMessage, saveConversationSummary } from "./utils/chatUtils";
 import { getUserContext } from "./utils/userContext";
 
 
@@ -29,31 +29,13 @@ export default function ChatInterface() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
-  const [chatTitle, setChatTitle] = useState("Nuevo Chat");
+  const [chatTitle, setChatTitle] = useState("Selecciona un chat");
 
+  const searchParams = useSearchParams();
   useEffect(() => {
-    const updateChatFromUrl = () => {
-      const searchParams = new URLSearchParams(window.location.search);
-      const chatId = searchParams.get('id');
-      setCurrentChatId(chatId);
-    };
-
-    updateChatFromUrl();
-
-    window.addEventListener('popstate', updateChatFromUrl);
-
-    const handleUrlChange = () => {
-      setTimeout(updateChatFromUrl, 0);
-    };
-
-    window.addEventListener('urlchange', handleUrlChange);
-
-
-    return () => {
-      window.removeEventListener('popstate', updateChatFromUrl);
-      window.removeEventListener('urlchange', handleUrlChange);
-    };
-  }, []);
+    const chatId = searchParams.get('id');
+    setCurrentChatId(chatId);
+  }, [searchParams]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -83,7 +65,8 @@ export default function ChatInterface() {
       setLoading(true);
 
       try {
-        let chatId = currentChatId;
+        const chatIdFromState = currentChatId;
+        const chatId = chatIdFromState;
 
         if (chatId) {
           try {
@@ -94,39 +77,36 @@ export default function ChatInterface() {
               const chatData = chatDoc.data();
               setChatTitle(chatData.title || "Chat sin título");
             } else {
-              chatId = await getOrCreateChat("Nuevo Chat", "General", userId, true);
-              setCurrentChatId(chatId);
-              setChatTitle("Nuevo Chat");
-              window.history.replaceState(null, '', `/chat?id=${chatId}`);
+              setCurrentChatId(null);
+              setChatTitle("Selecciona un chat");
             }
           } catch (error) {
             console.error("Error al verificar el chat:", error);
-            chatId = await getOrCreateChat("Nuevo Chat", "General", userId, true);
-            setCurrentChatId(chatId);
-            setChatTitle("Nuevo Chat");
-            window.history.replaceState(null, '', `/chat?id=${chatId}`);
+            setCurrentChatId(null);
+            setChatTitle("Selecciona un chat");
           }
         } else {
-          chatId = await getOrCreateChat("Nuevo Chat", "General", userId, true);
-          setCurrentChatId(chatId);
-          setChatTitle("Nuevo Chat");
-
-          window.history.replaceState(null, '', `/chat?id=${chatId}`);
+          setCurrentChatId(null);
+          setChatTitle("Selecciona un chat");
         }
 
-        const messagesRef = collection(db, "users", userId, "chats", chatId, "messages");
-        const q = query(messagesRef, orderBy("timestamp", "asc"));
-        const messagesSnapshot = await getDocs(q);
-        const loadedMessages = messagesSnapshot.docs.map(doc => doc.data());
+        if (chatId) {
+          const messagesRef = collection(db, "users", userId, "chats", chatId, "messages");
+          const q = query(messagesRef, orderBy("timestamp", "asc"));
+          const messagesSnapshot = await getDocs(q);
+          const loadedMessages = messagesSnapshot.docs.map(doc => doc.data());
 
-        const sortedMessages = loadedMessages
-          .filter(msg => msg.text && msg.sender)
-          .map(msg => ({
-            text: msg.text,
-            sender: msg.sender
-          }));
+          const sortedMessages = loadedMessages
+            .filter(msg => msg.text && msg.sender)
+            .map(msg => ({
+              text: msg.text,
+              sender: msg.sender
+            }));
 
-        setMessages(sortedMessages);
+          setMessages(sortedMessages);
+        } else {
+          setMessages([]);
+        }
       } catch (error) {
         console.error("Error al inicializar el chat:", error);
       } finally {
