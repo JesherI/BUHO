@@ -12,7 +12,7 @@ import ProfileCard from "../profile/ProfileCard";
 import { sendToGemini, generateChatTitle } from "../lib/gemini";
 import ChatMessages from "./components/ChatMessages";
 import ChatInput from "./components/ChatInput";
-import { saveMessage, saveConversationSummary } from "./utils/chatUtils";
+import { saveMessage, saveConversationSummary, getOrCreateChat } from "./utils/chatUtils";
 import { getUserContext } from "./utils/userContext";
 
 export default function ChatContent() {
@@ -113,13 +113,27 @@ export default function ChatContent() {
   }, [userId, currentChatId]);
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !userId || !currentChatId || isSubmitting) return;
+    if (!newMessage.trim() || !userId || isSubmitting) return;
 
     const userMessage = newMessage.trim();
 
     setIsSubmitting(true);
 
     try {
+      let chatIdToUse = currentChatId;
+      if (!chatIdToUse) {
+        try {
+          const createdId = await getOrCreateChat("Nuevo Chat", "General", userId, true);
+          chatIdToUse = createdId;
+          setCurrentChatId(createdId);
+          setChatTitle("Nuevo Chat");
+          router.push(`/chat?id=${createdId}`);
+        } catch (createErr) {
+          console.error("Error al crear chat:", createErr);
+          throw createErr;
+        }
+      }
+
       setMessages((prev) => [...prev, { text: userMessage, sender: "user" }]);
       setNewMessage("");
 
@@ -131,7 +145,7 @@ export default function ChatContent() {
           finalChatTitle = aiGeneratedTitle;
           setChatTitle(aiGeneratedTitle);
 
-          const chatRef = doc(db, "users", userId, "chats", currentChatId);
+          const chatRef = doc(db, "users", userId, "chats", chatIdToUse as string);
           await updateDoc(chatRef, { 
             title: aiGeneratedTitle,
             updatedAt: serverTimestamp()
@@ -143,7 +157,7 @@ export default function ChatContent() {
           setChatTitle(fallbackTitle);
           
           try {
-            const chatRef = doc(db, "users", userId, "chats", currentChatId);
+            const chatRef = doc(db, "users", userId, "chats", chatIdToUse as string);
             await updateDoc(chatRef, { 
               title: fallbackTitle,
               updatedAt: serverTimestamp()
@@ -155,7 +169,7 @@ export default function ChatContent() {
       }
 
       try {
-        await saveMessage(userId, currentChatId, userMessage, "user");
+        await saveMessage(userId, chatIdToUse as string, userMessage, "user");
       } catch (error) {
         console.error("Error al guardar mensaje del usuario:", error);
       }
@@ -174,11 +188,11 @@ export default function ChatContent() {
           { text: response, sender: "assistant" },
         ]);
 
-        await saveMessage(userId, currentChatId, response, "assistant");
+        await saveMessage(userId, chatIdToUse as string, response, "assistant");
 
         if (messages.length <= 2) {
           try {
-            await saveConversationSummary(userId, currentChatId, userMessage, finalChatTitle);
+            await saveConversationSummary(userId, chatIdToUse as string, userMessage, finalChatTitle);
           } catch (error) {
             console.error("Error al guardar resumen de conversación:", error);
           }
