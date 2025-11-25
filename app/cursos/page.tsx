@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/sidebar/sidebar";
 import ProfileMenu from "../components/profileMenu/profileMenu";
 import Navbar from "../components/navbar/navbar";
+import OfflineGate from "../components/OfflineGate";
 
 interface Course {
   id: string;
@@ -33,6 +34,7 @@ export default function CursosPage() {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
+    <OfflineGate>
     <div className="flex h-screen bg-black text-white overflow-hidden relative">
       <div className={`fixed left-0 top-0 h-full z-30 transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
@@ -92,5 +94,6 @@ export default function CursosPage() {
         </div>
       </div>
     </div>
+    </OfflineGate>
   );
 }
