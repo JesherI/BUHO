@@ -1,0 +1,18 @@
+diff --git a/app/components/sidebar/sidebar.tsx b/app/components/sidebar/sidebar.tsx
+index 1234567..abcdefg 100644
+--- a/app/components/sidebar/sidebar.tsx
++++ b/app/components/sidebar/sidebar.tsx
+@@ -422,6 +422,13 @@
+                   !\
+                 </span>
+               )}
+             </button>
++            <button
++              onClick={() => router.push('/courses')}
++              className="flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
++            >
++              <BookOpen size={16} />
++              <span>Cursos</span>
++            </button>
+           </div>
+         </div>

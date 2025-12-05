@@ -15,6 +15,7 @@ type CourseItem = {
   url: string;
   type?: "playlist" | "video";
   difficulty?: string;
+      authors?: string[];
 };
 
 export default function CursosPage() {
@@ -25,9 +26,10 @@ export default function CursosPage() {
   const [items, setItems] = useState<CourseItem[]>([]);
   const [itemsText, setItemsText] = useState<CourseItem[]>([]);
   const [itemsYoutube, setItemsYoutube] = useState<CourseItem[]>([]);
-  const [source, setSource] = useState<"youtube" | "text" | "all">("youtube");
+  const [itemsBooks, setItemsBooks] = useState<CourseItem[]>([]);
+  const [source, setSource] = useState<"youtube" | "text" | "books" | "all">("youtube");
   const [track, setTrack] = useState("javascript");
-  const [selected, setSelected] = useState<{ item: CourseItem; kind: "youtube" | "text" } | null>(null);
+  const [selected, setSelected] = useState<{ item: CourseItem; kind: "youtube" | "text" | "book" } | null>(null);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -36,6 +38,7 @@ export default function CursosPage() {
   useEffect(() => {
     const controller = new AbortController();
     const controllerY = new AbortController();
+    const controllerB = new AbortController();
     const load = async () => {
       setLoading(true);
       setError(null);
@@ -46,27 +49,33 @@ export default function CursosPage() {
           qpText.set("track", track);
           const qpYt = new URLSearchParams();
           if (debouncedQuery) qpYt.set("q", debouncedQuery);
+          const qpBooks = new URLSearchParams();
+          qpBooks.set("q", debouncedQuery || "education");
 
-          const [respText, respYt] = await Promise.all([
+          const [respText, respYt, respBooks] = await Promise.all([
             fetch(`/api/text-courses?${qpText.toString()}`, { signal: controller.signal }),
             fetch(`/api/courses?${qpYt.toString()}`, { signal: controllerY.signal }),
+            fetch(`/api/books?${qpBooks.toString()}`, { signal: controllerB.signal }),
           ]);
 
           const dataText = await respText.json();
           const dataYt = await respYt.json();
+          const dataBooks = await respBooks.json();
 
           setItemsText(Array.isArray(dataText?.results) ? dataText.results : []);
           setItemsYoutube(Array.isArray(dataYt?.results) ? dataYt.results : []);
+          setItemsBooks(Array.isArray(dataBooks?.results) ? dataBooks.results : []);
 
-          if (!respText.ok && !respYt.ok) {
+          if (!respText.ok && !respYt.ok && !respBooks.ok) {
             const errText = dataText?.error || `Error ${respText.status}`;
             const errYt = dataYt?.error || `Error ${respYt.status}`;
-            setError(`${errText} | ${errYt}`);
+            const errBooks = dataBooks?.error || `Error ${respBooks.status}`;
+            setError(`${errText} | ${errYt} | ${errBooks}`);
           } else {
             setError(null);
           }
         } else {
-          const endpoint = source === "youtube" ? "/api/courses" : "/api/text-courses";
+          const endpoint = source === "youtube" ? "/api/courses" : source === "text" ? "/api/text-courses" : "/api/books";
           const queryParams = new URLSearchParams();
           if (debouncedQuery) queryParams.set("q", debouncedQuery);
           if (source === "text") queryParams.set("track", track);
@@ -83,6 +92,7 @@ export default function CursosPage() {
         setItems([]);
         setItemsText([]);
         setItemsYoutube([]);
+        setItemsBooks([]);
       } finally {
         setLoading(false);
       }
@@ -91,6 +101,7 @@ export default function CursosPage() {
     return () => {
       controller.abort();
       controllerY.abort();
+      controllerB.abort();
     };
   }, [debouncedQuery, source, track]);
 
@@ -132,6 +143,10 @@ export default function CursosPage() {
                       className={`px-3 py-1.5 rounded-lg border text-xs ${source === "text" ? "bg-gray-800 text-white border-gray-700" : "bg-black/50 text-gray-400 border-gray-800"}`}
                     >Ejercicios</button>
                     <button
+                      onClick={() => setSource("books")}
+                      className={`px-3 py-1.5 rounded-lg border text-xs ${source === "books" ? "bg-gray-800 text-white border-gray-700" : "bg-black/50 text-gray-400 border-gray-800"}`}
+                    >Libros</button>
+                    <button
                       onClick={() => setSource("all")}
                       className={`px-3 py-1.5 rounded-lg border text-xs ${source === "all" ? "bg-gray-800 text-white border-gray-700" : "bg-black/50 text-gray-400 border-gray-800"}`}
                     >Todo</button>
@@ -167,7 +182,7 @@ export default function CursosPage() {
                   {[...items].sort((a, b) => a.title.localeCompare(b.title)).map((c) => (
                     <button
                       key={c.id}
-                      onClick={() => setSelected({ item: c, kind: source === "youtube" ? "youtube" : "text" })}
+                      onClick={() => setSelected({ item: c, kind: source === "youtube" ? "youtube" : source === "text" ? "text" : "book" })}
                       className="text-left w-full border border-gray-800/50 rounded-2xl p-3 bg-gray-900/40 hover:bg-gray-900/60 transition-colors"
                     >
                       {c.thumbnail && (
@@ -177,8 +192,10 @@ export default function CursosPage() {
                       <div className="min-w-0">
                         {source === "youtube" ? (
                           <div className="text-xs text-gray-500 mb-1">{c.channel} • {c.type === "playlist" ? "Playlist" : "Video"}</div>
-                        ) : (
+                        ) : source === "text" ? (
                           <div className="text-xs text-gray-500 mb-1">{c.difficulty || "Ejercicios"}</div>
+                        ) : (
+                          <div className="text-xs text-gray-500 mb-1">{(c.authors || []).join(", ") || "Libro"}</div>
                         )}
                         <h2 className="text-sm font-medium">{c.title}</h2>
                         {c.description && (
@@ -250,6 +267,34 @@ export default function CursosPage() {
                       )}
                     </div>
                   </div>
+
+                  <div>
+                    <div className="text-sm text-gray-400 mb-2">Libros</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {[...itemsBooks].sort((a, b) => a.title.localeCompare(b.title)).map((c) => (
+                        <button
+                          key={`b-${c.id}`}
+                          onClick={() => setSelected({ item: c, kind: "book" })}
+                          className="text-left w-full border border-gray-800/50 rounded-2xl p-3 bg-gray-900/40 hover:bg-gray-900/60 transition-colors"
+                        >
+                          {c.thumbnail && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={c.thumbnail} alt={c.title} className="w-full h-36 object-cover rounded-xl mb-3" />
+                          )}
+                          <div className="min-w-0">
+                            <div className="text-xs text-gray-500 mb-1">{(c.authors || []).join(", ") || "Libro"}</div>
+                            <h2 className="text-sm font-medium">{c.title}</h2>
+                            {c.description && (
+                              <p className="text-xs text-gray-400 line-clamp-2 mt-1">{c.description}</p>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                      {itemsBooks.length === 0 && (
+                        <div className="text-sm text-gray-400">Sin libros para esta búsqueda.</div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -259,7 +304,7 @@ export default function CursosPage() {
                   <div className="relative w-full max-w-3xl bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="text-sm text-gray-400">
-                        {selected.kind === "youtube" ? "YouTube" : "Ejercicios"}
+                        {selected.kind === "youtube" ? "YouTube" : selected.kind === "text" ? "Ejercicios" : "Libros"}
                       </div>
                       <button onClick={() => setSelected(null)} className="text-xs px-2 py-1 rounded-md border border-gray-700 text-gray-300 hover:bg-gray-800">Cerrar</button>
                     </div>
@@ -273,9 +318,25 @@ export default function CursosPage() {
                           allowFullScreen
                         />
                       </div>
-                    ) : (
+                    ) : selected.kind === "text" ? (
                       <div className="space-y-2 mb-3">
                         <div className="text-xs text-gray-500">{selected.item.difficulty || "Ejercicios"}</div>
+                        {selected.item.description && (
+                          <div className="text-sm text-gray-300">{selected.item.description}</div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-2 mb-3">
+                        {(selected.item.authors || []).length > 0 && (
+                          <div className="text-xs text-gray-500">{(selected.item.authors || []).join(", ")}</div>
+                        )}
+                        <div className="aspect-video w-full rounded-xl overflow-hidden mb-3">
+                          <iframe
+                            src={`https://books.google.com/books?id=${selected.item.id}&output=embed`}
+                            className="w-full h-full"
+                            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          />
+                        </div>
                         {selected.item.description && (
                           <div className="text-sm text-gray-300">{selected.item.description}</div>
                         )}
