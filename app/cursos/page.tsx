@@ -54,7 +54,7 @@ export default function CursosPage() {
       }
       const blob = await res.blob();
       const ct = blob.type || res.headers.get("content-type") || "application/octet-stream";
-      const nameBase = (selected.item.title || "libro").replace(/[^\w\-]+/g, "_").slice(0, 60);
+      const nameBase = (selected.item.title || "libro").replace(/[^\w-]+/g, "_").slice(0, 60);
       const ext = selected.item.pdfUrl || ct.includes("pdf") ? "pdf" : ct.includes("epub") ? "epub" : ct.includes("html") ? "html" : ct.includes("text") ? "txt" : "bin";
       const urlObj = URL.createObjectURL(blob);
       const a = document.createElement("a");

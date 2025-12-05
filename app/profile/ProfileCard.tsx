@@ -96,7 +96,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
     <>
       {/* Notificación */}
       {notification && (
-        <div className={`fixed top-4 right-4 z-[60] px-6 py-3 rounded-xl shadow-lg backdrop-blur-sm border flex items-center gap-3 transition-all duration-300 ${
+        <div className={`fixed top-4 right-4 z-60 px-6 py-3 rounded-xl shadow-lg backdrop-blur-sm border flex items-center gap-3 transition-all duration-300 ${
           notification.type === 'success' 
             ? 'bg-emerald-600/90 text-white border-emerald-500/30' 
             : 'bg-red-600/90 text-white border-red-500/30'
@@ -144,7 +144,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
           {/* Avatar central con foto del usuario */}
           <div className="flex justify-center mb-6">
             <div className="relative">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center border-2 border-gray-600 shadow-lg">
+              <div className="w-24 h-24 rounded-full bg-linear-to-br from-gray-700 to-gray-900 flex items-center justify-center border-2 border-gray-600 shadow-lg">
                 {(photoBase64 || user?.photoURL) ? (
                   <Image
                     src={photoBase64 || user?.photoURL || ''}
@@ -220,7 +220,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full mt-6 py-3 rounded-lg bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-gray-200 font-medium transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border border-gray-600"
+            className="w-full mt-6 py-3 rounded-lg bg-linear-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-gray-200 font-medium transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border border-gray-600"
           >
             {loading ? "Guardando..." : "Guardar Cambios"}
           </button>
