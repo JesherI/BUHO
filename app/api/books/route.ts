@@ -35,8 +35,10 @@ export async function GET(request: Request) {
       const thumbnail = b.formats["image/jpeg"] || undefined;
       const html = b.formats["text/html"] || b.formats["text/html; charset=utf-8"];
       const text = b.formats["text/plain"] || b.formats["text/plain; charset=utf-8"];
-      const url = html || text || ""; // contenido real del libro
-      return { id, title, description, authors, thumbnail, url };
+      const pdf = b.formats["application/pdf"] || undefined;
+      const url = html || text || ""; // contenido para leer embebido
+      const pdfUrl = pdf || undefined; // enlace directo al PDF si existe
+      return { id, title, description, authors, thumbnail, url, pdfUrl };
     }).filter((r) => r.id && r.title && r.url);
 
     return NextResponse.json({ results });

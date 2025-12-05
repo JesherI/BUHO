@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Sidebar from "../components/sidebar/sidebar";
 import ProfileMenu from "../components/profileMenu/profileMenu";
 import Navbar from "../components/navbar/navbar";
+import ProfileCard from "../profile/ProfileCard";
 import OfflineGate from "../components/OfflineGate";
 
 type CourseItem = {
@@ -13,6 +14,7 @@ type CourseItem = {
   channel?: string;
   thumbnail?: string;
   url: string;
+  pdfUrl?: string;
   type?: "playlist" | "video";
   difficulty?: string;
   authors?: string[];
@@ -20,6 +22,7 @@ type CourseItem = {
 
 export default function CursosPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,8 +38,37 @@ export default function CursosPage() {
   const [bookError, setBookError] = useState<string | null>(null);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const handleProfileClick = () => setShowProfile(true);
+  const handleCloseProfile = () => setShowProfile(false);
 
   const debouncedQuery = useMemo(() => query, [query]);
+
+  const handleDownloadBook = async () => {
+    try {
+      if (!selected || selected.kind !== "book" || !selected.item.url) return;
+      const target = selected.item.pdfUrl || selected.item.url;
+      const res = await fetch(`/api/book-content?url=${encodeURIComponent(target)}`);
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j?.error || `Error ${res.status}`);
+      }
+      const blob = await res.blob();
+      const ct = blob.type || res.headers.get("content-type") || "application/octet-stream";
+      const nameBase = (selected.item.title || "libro").replace(/[^\w\-]+/g, "_").slice(0, 60);
+      const ext = selected.item.pdfUrl || ct.includes("pdf") ? "pdf" : ct.includes("epub") ? "epub" : ct.includes("html") ? "html" : ct.includes("text") ? "txt" : "bin";
+      const urlObj = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = urlObj;
+      a.download = `${nameBase}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(urlObj);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setBookError(msg);
+    }
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -151,7 +183,7 @@ export default function CursosPage() {
         <div className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${isSidebarOpen ? "md:ml-80" : "ml-0"}`}>
           <div className="fixed top-0 left-0 w-full z-40">
             <Navbar showAuth={false} toggleSidebar={toggleSidebar}>
-              <ProfileMenu onProfileClick={() => {}} />
+              <ProfileMenu onProfileClick={handleProfileClick} />
             </Navbar>
           </div>
 
@@ -387,8 +419,11 @@ export default function CursosPage() {
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      {selected.kind !== "book" && selected.item.url && (
+                      {selected.kind === "youtube" && selected.item.url && (
                         <a href={selected.item.url} target="_blank" rel="noopener noreferrer" className="text-xs px-3 py-1.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-600/40 hover:bg-amber-500/30">Abrir en fuente</a>
+                      )}
+                      {selected.kind === "book" && selected.item.url && (
+                        <button onClick={handleDownloadBook} className="text-xs px-3 py-1.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-600/40 hover:bg-emerald-500/30">Descargar libro</button>
                       )}
                     </div>
                   </div>
@@ -397,6 +432,7 @@ export default function CursosPage() {
             </div>
           </div>
         </div>
+        {showProfile && <ProfileCard key={Date.now()} onClose={handleCloseProfile} />}
       </div>
     </OfflineGate>
   );

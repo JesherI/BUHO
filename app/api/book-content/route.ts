@@ -20,19 +20,23 @@ export async function GET(request: Request) {
     if (!resp.ok) {
       return NextResponse.json({ error: `Upstream ${resp.status}` }, { status: resp.status });
     }
-    const contentType = resp.headers.get("content-type") || "text/plain";
-    const body = await resp.text();
+    const contentType = resp.headers.get("content-type") || "application/octet-stream";
 
-    // Pasar como texto sin modificación
-    return new NextResponse(body, {
-      status: 200,
-      headers: {
-        "content-type": contentType,
-      },
-    });
+    if (/^text\//i.test(contentType) || /html/i.test(contentType)) {
+      const body = await resp.text();
+      return new NextResponse(body, {
+        status: 200,
+        headers: { "content-type": contentType },
+      });
+    } else {
+      const buf = await resp.arrayBuffer();
+      return new NextResponse(buf, {
+        status: 200,
+        headers: { "content-type": contentType },
+      });
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-
