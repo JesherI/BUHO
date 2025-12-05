@@ -65,13 +65,13 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, toggleTask, onEdit, onDelete,
         <div className="flex gap-1">
           <button
             onClick={() => onEdit(task)}
-            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-orange-400 transition-all duration-200 p-2 rounded-lg hover:bg-orange-500/10 cursor-pointer"
+            className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-gray-400 hover:text-orange-400 transition-all duration-200 p-2 rounded-lg hover:bg-orange-500/10 cursor-pointer"
           >
             <Edit3 size={14} />
           </button>
           <button
             onClick={() => onDelete(task)}
-            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400 transition-all duration-200 p-2 rounded-lg hover:bg-red-500/10 cursor-pointer"
+            className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-gray-400 hover:text-red-400 transition-all duration-200 p-2 rounded-lg hover:bg-red-500/10 cursor-pointer"
           >
             <Trash2 size={14} />
           </button>

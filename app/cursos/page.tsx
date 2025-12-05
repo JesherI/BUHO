@@ -15,7 +15,7 @@ type CourseItem = {
   url: string;
   type?: "playlist" | "video";
   difficulty?: string;
-      authors?: string[];
+  authors?: string[];
 };
 
 export default function CursosPage() {
@@ -30,6 +30,9 @@ export default function CursosPage() {
   const [source, setSource] = useState<"youtube" | "text" | "books" | "all">("youtube");
   const [track, setTrack] = useState("javascript");
   const [selected, setSelected] = useState<{ item: CourseItem; kind: "youtube" | "text" | "book" } | null>(null);
+  const [bookHtml, setBookHtml] = useState<string>("");
+  const [bookLoading, setBookLoading] = useState(false);
+  const [bookError, setBookError] = useState<string | null>(null);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -104,6 +107,39 @@ export default function CursosPage() {
       controllerB.abort();
     };
   }, [debouncedQuery, source, track]);
+
+  useEffect(() => {
+    if (selected?.kind === "book" && selected.item.url) {
+      const controller = new AbortController();
+      const loadBook = async () => {
+        setBookLoading(true);
+        setBookError(null);
+        setBookHtml("");
+        try {
+          const res = await fetch(`/api/book-content?url=${encodeURIComponent(selected.item.url)}`, { signal: controller.signal });
+          if (!res.ok) {
+            const j = await res.json().catch(() => ({}));
+            throw new Error(j?.error || `Error ${res.status}`);
+          }
+          const text = await res.text();
+          const base = selected.item.url.replace(/\/[^/]*$/, "/");
+          const srcdoc = `<!doctype html><html><head><base href="${base}"><meta charset="utf-8"><style>body{background:#0b0b0b;color:#e5e5e5;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6;padding:16px} a{color:#f59e0b} img{max-width:100%} h1,h2,h3{color:#fff} pre,code{background:#111;padding:2px 4px;border-radius:6px}</style></head><body>${text}</body></html>`;
+          setBookHtml(srcdoc);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          setBookError(msg);
+        } finally {
+          setBookLoading(false);
+        }
+      };
+      loadBook();
+      return () => controller.abort();
+    } else {
+      setBookHtml("");
+      setBookError(null);
+      setBookLoading(false);
+    }
+  }, [selected]);
 
   return (
     <OfflineGate>
@@ -330,20 +366,28 @@ export default function CursosPage() {
                         {(selected.item.authors || []).length > 0 && (
                           <div className="text-xs text-gray-500">{(selected.item.authors || []).join(", ")}</div>
                         )}
-                        <div className="aspect-video w-full rounded-xl overflow-hidden mb-3">
-                          <iframe
-                            src={`https://books.google.com/books?id=${selected.item.id}&output=embed`}
-                            className="w-full h-full"
-                            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          />
-                        </div>
+                        {bookLoading && (
+                          <div className="text-sm text-gray-400">Cargando libro…</div>
+                        )}
+                        {bookError && (
+                          <div className="text-sm text-red-400 bg-red-900/20 border border-red-700/30 rounded-xl px-3 py-2">{bookError}</div>
+                        )}
+                        {!bookLoading && !bookError && bookHtml && (
+                          <div className="w-full h-[70vh] rounded-xl overflow-hidden mb-3 border border-gray-800">
+                            <iframe
+                              srcDoc={bookHtml}
+                              className="w-full h-full"
+                              sandbox=""
+                            />
+                          </div>
+                        )}
                         {selected.item.description && (
                           <div className="text-sm text-gray-300">{selected.item.description}</div>
                         )}
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      {selected.item.url && (
+                      {selected.kind !== "book" && selected.item.url && (
                         <a href={selected.item.url} target="_blank" rel="noopener noreferrer" className="text-xs px-3 py-1.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-600/40 hover:bg-amber-500/30">Abrir en fuente</a>
                       )}
                     </div>
