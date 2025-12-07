@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "../components/sidebar/sidebar";
 import ProfileMenu from "../components/profileMenu/profileMenu";
 import Navbar from "../components/navbar/navbar";
 import ProfileCard from "../profile/ProfileCard";
 import OfflineGate from "../components/OfflineGate";
+import { auth } from "../db/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 type CourseItem = {
   id: string;
@@ -21,6 +24,7 @@ type CourseItem = {
 };
 
 export default function CursosPage() {
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [query, setQuery] = useState("");
@@ -172,6 +176,16 @@ export default function CursosPage() {
       setBookLoading(false);
     }
   }, [selected]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push("/log-in");
+      }
+    });
+    return () => unsub();
+  }, [router]);
 
   return (
     <OfflineGate>

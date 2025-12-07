@@ -113,7 +113,7 @@ const CookiesPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/5 w-2 h-2 bg-slate-400/10 rounded-full animate-pulse"></div>
         <div className="absolute top-1/3 right-1/4 w-1 h-1 bg-slate-400/20 rounded-full animate-pulse delay-1000"></div>
@@ -121,7 +121,7 @@ const CookiesPage: React.FC = () => {
         <div className="absolute top-3/4 right-1/3 w-1 h-1 bg-slate-300/20 rounded-full animate-pulse delay-500"></div>
       </div>
 
-      <div className="relative overflow-hidden bg-gradient-to-b from-slate-950/95 via-slate-900/80 to-transparent">        
+      <div className="relative overflow-hidden bg-linear-to-b from-slate-950/95 via-slate-900/80 to-transparent">        
         <div className="relative px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center mb-10">
             <button
@@ -136,7 +136,7 @@ const CookiesPage: React.FC = () => {
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl sm:text-6xl font-bold text-white mb-6 leading-tight">
               Política de{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 via-slate-200 to-slate-300">
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-slate-300 via-slate-200 to-slate-300">
                 Cookies
               </span>
             </h1>
@@ -246,7 +246,7 @@ const CookiesPage: React.FC = () => {
               </div>
               
               {cookieTypes.indexOf(cookie) !== cookieTypes.length - 1 && (
-                <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-700/30 to-transparent mt-8"></div>
+                <div className="w-full h-px bg-linear-to-r from-transparent via-slate-700/30 to-transparent mt-8"></div>
               )}
             </div>
           ))}
