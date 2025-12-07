@@ -181,7 +181,7 @@ export default function ChatContent() {
 
         const response = await sendToGemini(userMessage, messages, userContext);
 
-        console.log("Respuesta de Gemini:", response);
+        
 
         setMessages((prev) => [
           ...prev.slice(0, -1),

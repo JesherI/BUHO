@@ -19,7 +19,6 @@ export const cookieUtils = {
     const valueToStore = typeof value === 'object' ? JSON.stringify(value) : String(value);
     try {
       Cookies.set(key, valueToStore, { ...defaultOptions, ...options });
-      console.log(`✅ Cookie guardada: ${key}`);
       return true;
     } catch (error) {
       console.error(`❌ Error guardando cookie ${key}:`, error);
@@ -49,7 +48,6 @@ export const cookieUtils = {
   remove: (key: string) => {
     try {
       Cookies.remove(key, { path: '/' });
-      console.log(`🗑️ Cookie eliminada: ${key}`);
       return true;
     } catch (error) {
       console.error(`❌ Error eliminando cookie ${key}:`, error);
@@ -67,9 +65,6 @@ export const cookieUtils = {
 
   acceptCookies: () => {
     const success = cookieUtils.set(COOKIE_KEYS.COOKIES_ACCEPTED, 'true');
-    if (success) {
-      console.log('🎉 Usuario aceptó las cookies');
-    }
     return success;
   },
 
@@ -81,9 +76,6 @@ export const cookieUtils = {
   setAuthToken: (token: string, rememberMe: boolean = false) => {
     const expires = rememberMe ? 30 : 1; // 30 días si "recordar", 1 día si no
     const success = cookieUtils.set(COOKIE_KEYS.AUTH_TOKEN, token, { expires });
-    if (success) {
-      console.log(`🔐 Token de auth guardado (expira en ${expires} días)`);
-    }
     return success;
   },
 
@@ -94,18 +86,11 @@ export const cookieUtils = {
   logout: () => {
     const tokenRemoved = cookieUtils.remove(COOKIE_KEYS.AUTH_TOKEN);
     const sessionRemoved = cookieUtils.remove(COOKIE_KEYS.USER_SESSION);
-    
-    if (tokenRemoved || sessionRemoved) {
-      console.log('👋 Sesión cerrada - cookies eliminadas');
-    }
-    return tokenRemoved;
+    return tokenRemoved || sessionRemoved;
   },
 
   setUserSession: (userData: { userId: string; username: string; email?: string }) => {
     const success = cookieUtils.set(COOKIE_KEYS.USER_SESSION, userData);
-    if (success) {
-      console.log('👤 Datos de usuario guardados');
-    }
     return success;
   },
 
@@ -115,9 +100,6 @@ export const cookieUtils = {
 
   setChatPreferences: (preferences: { language?: string; notifications?: boolean }) => {
     const success = cookieUtils.set(COOKIE_KEYS.CHAT_PREFERENCES, preferences);
-    if (success) {
-      console.log('⚙️ Preferencias del chat guardadas');
-    }
     return success;
   },
 
@@ -132,13 +114,6 @@ export const cookieUtils = {
   },
 
   debugAllCookies: () => {
-    console.log('=== 🍪 DEBUG COOKIES ===');
-    console.log('Cookies aceptadas:', cookieUtils.areCookiesAccepted());
-    console.log('Usuario logueado:', cookieUtils.isLoggedIn());
-    console.log('Token de auth:', cookieUtils.getAuthToken() ? '✅ Existe' : '❌ No existe');
-    console.log('Sesión de usuario:', cookieUtils.getUserSession());
-    console.log('Preferencias:', cookieUtils.getChatPreferences());
-    console.log('Todas las cookies:', cookieUtils.getAll());
-    console.log('========================');
+    return;
   }
 };

@@ -75,9 +75,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
         email: user.email || undefined
       });
 
-      console.log('✅ Datos de usuario guardados en cookies');
+      
     } else {
-      console.log('ℹ️ Cookies no aceptadas, usando solo Firebase Auth');
+      
     }
   };
 
@@ -155,13 +155,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
   };
 
   // MANEJAR ACEPTACIÓN DE COOKIES
-  const handleCookiesAccepted = () => {
-    console.log('🍪 Usuario aceptó las cookies desde AuthPage');
-  };
+  const handleCookiesAccepted = () => {};
 
-  const handleCookiesRejected = () => {
-    console.log('❌ Usuario rechazó las cookies');
-  };
+  const handleCookiesRejected = () => {};
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4 sm:p-6 lg:p-12 relative overflow-hidden">

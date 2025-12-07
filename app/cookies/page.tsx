@@ -5,7 +5,7 @@ import { ArrowLeft, Shield, Settings, Save, Check, Mail, Calendar, Users, Lock, 
 
 // Simulamos cookieUtils para el ejemplo
 const cookieUtils = {
-  acceptCookies: () => console.log('Cookies accepted'),
+  acceptCookies: () => {},
   get: (key: string) => key === 'essential_cookies' ? true : false,
   areCookiesAccepted: () => true
 };

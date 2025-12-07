@@ -89,7 +89,7 @@ export async function saveConversationSummary(userId: string, chatId: string, fi
       updatedAt: serverTimestamp()
     });
     
-    console.log(`Resumen guardado para chat ${chatId}: ${topic}`);
+    
   } catch (error) {
     console.error("Error al guardar resumen de conversación:", error);
     throw error;

@@ -15,23 +15,19 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ onAccept, onReject }) => {
   useEffect(() => {
     // Solo mostrar si no se han aceptado las galletas
     const cookiesAccepted = cookieUtils.areCookiesAccepted();
-    console.log('🍪 Cookies aceptadas:', cookiesAccepted);
     
     if (!cookiesAccepted) {
       setIsVisible(true);
-      console.log('👀 Mostrando banner de cookies');
     }
   }, []);
 
   const handleAccept = () => {
-    console.log('✅ Usuario aceptó las cookies');
     cookieUtils.acceptCookies();
     setIsVisible(false);
     onAccept?.();
   };
 
   const handleReject = () => {
-    console.log('❌ Usuario rechazó las cookies');
     setIsVisible(false);
     onReject?.();
   };
