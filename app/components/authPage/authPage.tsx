@@ -179,7 +179,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
 
       <div className="flex flex-col lg:flex-row w-full max-w-6xl rounded-xl sm:rounded-2xl overflow-hidden relative z-10 min-h-[500px] sm:min-h-[600px] shadow-xl mx-4">
         {/* Card dorada */}
-        <div className="w-full lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-amber-300 via-amber-400 to-amber-200 flex flex-col justify-center items-center p-3 sm:p-4 lg:p-6 min-h-[80px] sm:min-h-[100px] lg:min-h-[120px] text-white">
+        <div className="w-full lg:w-1/2 relative overflow-hidden bg-linear-to-br from-amber-300 via-amber-400 to-amber-200 flex flex-col justify-center items-center p-3 sm:p-4 lg:p-6 min-h-[80px] sm:min-h-[100px] lg:min-h-[120px] text-white">
           <div className="z-10 w-full text-center flex flex-row justify-center gap-6 lg:gap-12">
             {!isLogin ? (
               <h2 className="text-3xl text-gray-900">Sign Up</h2>

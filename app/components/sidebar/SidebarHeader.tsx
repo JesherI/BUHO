@@ -10,7 +10,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ activeTab, setIsOpen }) =
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-800/30 bg-black min-w-[320px]">
       <h2 className="text-lg font-normal text-gray-100 select-none">
-        {activeTab === 'chats' ? 'Chats' : activeTab === 'tasks' ? 'Agenda de Tareas' : 'Cursos'}
+        {activeTab === 'chats' ? 'Chats' : activeTab === 'tasks' ? 'Agenda de Tareas' : 'Contenidos'}
       </h2>
       <button
         onClick={() => setIsOpen(false)}

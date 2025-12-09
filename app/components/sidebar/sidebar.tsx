@@ -361,7 +361,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     { id: 'toggle', icon: Menu, label: 'Ocultar' },
     { id: 'chats', icon: MessageCircle, label: 'Chats', count: conversations.length },
     { id: 'tasks', icon: CheckSquare, label: 'Tareas', count: pendingTasks },
-    { id: 'courses', icon: BookOpen, label: 'Cursos' },
+    { id: 'courses', icon: BookOpen, label: 'Contenidos' },
   ];
   
 
@@ -435,7 +435,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
               }`}
             >
               <BookOpen size={16} />
-              <span>Cursos</span>
+              <span>Contenidos</span>
             </button>
           </div>
         </div>

@@ -23,6 +23,44 @@ type CourseItem = {
   authors?: string[];
 };
 
+type OpenAlexAuthorship = { author?: { display_name?: string } };
+type OpenAlexWork = {
+  id?: string;
+  doi?: string;
+  ids?: { openalex?: string; doi?: string };
+  display_name?: string;
+  authorships?: OpenAlexAuthorship[];
+  publication_year?: number;
+};
+
+const SpectrumLoader: React.FC = () => (
+  <div className="w-full flex flex-col items-center justify-center py-12">
+    <div className="flex items-end gap-[3px] px-1 py-1 bg-transparent rounded-xl">
+      {Array.from({ length: 18 }).map((_, i) => (
+        <span
+          key={`b-${i}`}
+          className="w-1.5 rounded-sm"
+          style={{
+            height: 24,
+            background: "linear-gradient(to top,#3f3f46,#9ca3af)",
+            animation: `equalize 1.6s ease-in-out ${i * 0.07}s infinite`
+          }}
+        />
+      ))}
+    </div>
+    <div className="mt-3 text-sm text-gray-400">Cargando…</div>
+    <style jsx>{`
+      @keyframes equalize {
+        0% { transform: scaleY(0.5) }
+        25% { transform: scaleY(1.3) }
+        50% { transform: scaleY(0.6) }
+        75% { transform: scaleY(1.1) }
+        100% { transform: scaleY(0.8) }
+      }
+    `}</style>
+  </div>
+);
+
 export default function CursosPage() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -34,8 +72,7 @@ export default function CursosPage() {
   const [itemsText, setItemsText] = useState<CourseItem[]>([]);
   const [itemsYoutube, setItemsYoutube] = useState<CourseItem[]>([]);
   const [itemsBooks, setItemsBooks] = useState<CourseItem[]>([]);
-  const [source, setSource] = useState<"youtube" | "text" | "books" | "all">("youtube");
-  const [track, setTrack] = useState("javascript");
+  const [source, setSource] = useState<"youtube" | "text" | "books" | "all">("text");
   const [selected, setSelected] = useState<{ item: CourseItem; kind: "youtube" | "text" | "book" } | null>(null);
   const [bookHtml, setBookHtml] = useState<string>("");
   const [bookLoading, setBookLoading] = useState(false);
@@ -82,48 +119,104 @@ export default function CursosPage() {
       setLoading(true);
       setError(null);
       try {
+        const q = debouncedQuery || "matemáticas";
+        const searchUrl = `https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`;
+        const fetchWikiSummaries = async () => {
+          const resp = await fetch(searchUrl, { signal: controller.signal });
+          const data = await resp.json();
+          if (!resp.ok) {
+            throw new Error(data?.error?.info || `Error ${resp.status}`);
+          }
+          const results = Array.isArray(data?.query?.search) ? data.query.search.slice(0, 12) : [];
+          const summaries = await Promise.all(
+            results.map(async (r: { title: string }) => {
+              try {
+                const sResp = await fetch(`https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(r.title)}`);
+                const sData = await sResp.json();
+                const title = (sData?.title || r.title) as string;
+                const description = (sData?.extract || "") as string;
+                const thumbnail = (sData?.thumbnail?.source || undefined) as string | undefined;
+                const url = `https://es.wikipedia.org/wiki/${encodeURIComponent(title)}`;
+                return { id: title, title, description, thumbnail, url } as CourseItem;
+              } catch {
+                const title = r.title;
+                const url = `https://es.wikipedia.org/wiki/${encodeURIComponent(title)}`;
+                return { id: title, title, description: "", url } as CourseItem;
+              }
+            })
+          );
+          return summaries;
+        };
+
         if (source === "all") {
-          const qpText = new URLSearchParams();
-          if (debouncedQuery) qpText.set("q", debouncedQuery);
-          qpText.set("track", track);
-          const qpYt = new URLSearchParams();
-          if (debouncedQuery) qpYt.set("q", debouncedQuery);
-          const qpBooks = new URLSearchParams();
-          qpBooks.set("q", debouncedQuery || "education");
-
-          const [respText, respYt, respBooks] = await Promise.all([
-            fetch(`/api/text-courses?${qpText.toString()}`, { signal: controller.signal }),
-            fetch(`/api/courses?${qpYt.toString()}`, { signal: controllerY.signal }),
-            fetch(`/api/books?${qpBooks.toString()}`, { signal: controllerB.signal }),
+          const [wikiItems, ytData, bookData] = await Promise.all([
+            fetchWikiSummaries().catch(() => [] as CourseItem[]),
+            (async () => {
+              const qpYt = new URLSearchParams();
+              if (debouncedQuery) qpYt.set("q", debouncedQuery);
+              const respYt = await fetch(`/api/courses?${qpYt.toString()}`, { signal: controllerY.signal });
+              const dataYt = await respYt.json();
+              return respYt.ok && Array.isArray(dataYt?.results) ? (dataYt.results as CourseItem[]) : [];
+            })(),
+            (async () => {
+              const qpBooks = new URLSearchParams();
+              qpBooks.set("q", debouncedQuery || "education");
+              const respBooks = await fetch(`/api/books?${qpBooks.toString()}`, { signal: controllerB.signal });
+              const dataBooks = await respBooks.json();
+              return respBooks.ok && Array.isArray(dataBooks?.results) ? (dataBooks.results as CourseItem[]) : [];
+            })(),
           ]);
-
-          const dataText = await respText.json();
-          const dataYt = await respYt.json();
-          const dataBooks = await respBooks.json();
-
-          setItemsText(Array.isArray(dataText?.results) ? dataText.results : []);
-          setItemsYoutube(Array.isArray(dataYt?.results) ? dataYt.results : []);
-          setItemsBooks(Array.isArray(dataBooks?.results) ? dataBooks.results : []);
-
-          if (!respText.ok && !respYt.ok && !respBooks.ok) {
-            const errText = dataText?.error || `Error ${respText.status}`;
-            const errYt = dataYt?.error || `Error ${respYt.status}`;
-            const errBooks = dataBooks?.error || `Error ${respBooks.status}`;
-            setError(`${errText} | ${errYt} | ${errBooks}`);
+          setItemsText(wikiItems);
+          setItemsYoutube(ytData);
+          setItemsBooks(bookData);
+          if (wikiItems.length === 0 && ytData.length === 0 && bookData.length === 0) {
+            setError("Sin resultados para la búsqueda");
           } else {
             setError(null);
           }
-        } else {
-          const endpoint = source === "youtube" ? "/api/courses" : source === "text" ? "/api/text-courses" : "/api/books";
-          const queryParams = new URLSearchParams();
-          if (debouncedQuery) queryParams.set("q", debouncedQuery);
-          if (source === "text") queryParams.set("track", track);
-          const resp = await fetch(`${endpoint}?${queryParams.toString()}`, { signal: controller.signal });
-          const data = await resp.json();
-          if (!resp.ok) {
-            throw new Error(data?.error || `Error ${resp.status}`);
+        } else if (source === "text") {
+          let results = await fetchWikiSummaries().catch(() => [] as CourseItem[]);
+          if (results.length === 0) {
+            try {
+              const oa = await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(q)}&per_page=12`, { signal: controller.signal });
+              const oaData = await oa.json();
+              const works = Array.isArray(oaData?.results) ? (oaData.results as OpenAlexWork[]) : [];
+              results = works.map((w: OpenAlexWork) => {
+                const id = String(w.id || w.doi || w.ids?.openalex || w.ids?.doi || Math.random());
+                const title = String(w.display_name || "");
+                const authors = Array.isArray(w.authorships) ? w.authorships.map((a: OpenAlexAuthorship) => a.author?.display_name || "").filter(Boolean) : [];
+                const pubYear = w.publication_year ? String(w.publication_year) : "";
+                const description = [authors.join(", "), pubYear].filter(Boolean).join(" · ");
+                const url = String(w.id || "");
+                return { id, title, description, url } as CourseItem;
+              }).filter((r: CourseItem) => r.id && r.title);
+            } catch {}
           }
-          setItems(data.results || []);
+          setItems(results);
+          if (results.length === 0) {
+            setError("Sin contenidos disponibles");
+          } else {
+            setError(null);
+          }
+        } else if (source === "youtube") {
+          const qpYt = new URLSearchParams();
+          if (debouncedQuery) qpYt.set("q", debouncedQuery);
+          qpYt.set("alt", "1");
+          const respYt = await fetch(`/api/courses?${qpYt.toString()}`, { signal: controllerY.signal });
+          const dataYt = await respYt.json();
+          if (!respYt.ok) {
+            throw new Error(dataYt?.error || `Error ${respYt.status}`);
+          }
+          setItems(Array.isArray(dataYt?.results) ? dataYt.results : []);
+        } else {
+          const qpBooks = new URLSearchParams();
+          qpBooks.set("q", debouncedQuery || "education");
+          const respBooks = await fetch(`/api/books?${qpBooks.toString()}`, { signal: controllerB.signal });
+          const dataBooks = await respBooks.json();
+          if (!respBooks.ok) {
+            throw new Error(dataBooks?.error || `Error ${respBooks.status}`);
+          }
+          setItems(Array.isArray(dataBooks?.results) ? dataBooks.results : []);
         }
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
@@ -142,7 +235,7 @@ export default function CursosPage() {
       controllerY.abort();
       controllerB.abort();
     };
-  }, [debouncedQuery, source, track]);
+  }, [debouncedQuery, source]);
 
   useEffect(() => {
     if (selected?.kind === "book" && selected.item.url) {
@@ -204,14 +297,14 @@ export default function CursosPage() {
           <div className="flex-1 pt-20 px-4 sm:px-6 lg:px-8 overflow-y-auto">
             <div className="max-w-5xl mx-auto">
               <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold">Cursos gratuitos</h1>
+                <h1 className="text-2xl font-semibold">Contenidos</h1>
               </div>
 
               <div className="mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Buscar tema o curso"
+                  placeholder="Buscar tema o contenido"
                   className="w-full bg-black/50 border border-gray-800 rounded-xl px-3 py-2 text-white placeholder-gray-500"
                 />
                 <div className="sm:col-span-2 text-xs text-gray-500 flex items-center">
@@ -223,7 +316,7 @@ export default function CursosPage() {
                     <button
                       onClick={() => setSource("text")}
                       className={`px-3 py-1.5 rounded-lg border text-xs ${source === "text" ? "bg-gray-800 text-white border-gray-700" : "bg-black/50 text-gray-400 border-gray-800"}`}
-                    >Ejercicios</button>
+                    >Contenidos</button>
                     <button
                       onClick={() => setSource("books")}
                       className={`px-3 py-1.5 rounded-lg border text-xs ${source === "books" ? "bg-gray-800 text-white border-gray-700" : "bg-black/50 text-gray-400 border-gray-800"}`}
@@ -232,31 +325,17 @@ export default function CursosPage() {
                       onClick={() => setSource("all")}
                       className={`px-3 py-1.5 rounded-lg border text-xs ${source === "all" ? "bg-gray-800 text-white border-gray-700" : "bg-black/50 text-gray-400 border-gray-800"}`}
                     >Todo</button>
-                    {source === "text" && (
-                      <select
-                        value={track}
-                        onChange={(e) => setTrack(e.target.value)}
-                        className="px-2 py-1.5 rounded-lg border text-xs bg-black/50 text-gray-300 border-gray-800"
-                      >
-                        <option value="javascript">JavaScript</option>
-                        <option value="python">Python</option>
-                        <option value="java">Java</option>
-                        <option value="csharp">C#</option>
-                        <option value="go">Go</option>
-                      </select>
-                    )}
+                    
                   </div>
                 </div>
               </div>
 
               {error && (
-                <div className="mb-4 text-sm text-red-400 bg-red-900/20 border border-red-700/30 rounded-xl px-3 py-2">
-                  {source === "youtube" && error.includes("YOUTUBE_API_KEY") ? "Falta configurar YOUTUBE_API_KEY en .env.local" : error}
-                </div>
+                <SpectrumLoader />
               )}
 
               {loading && (
-                <div className="text-sm text-gray-400">Cargando cursos…</div>
+                <SpectrumLoader />
               )}
 
               {!loading && !error && source !== "all" && (
@@ -275,19 +354,19 @@ export default function CursosPage() {
                         {source === "youtube" ? (
                           <div className="text-xs text-gray-500 mb-1">{c.channel} • {c.type === "playlist" ? "Playlist" : "Video"}</div>
                         ) : source === "text" ? (
-                          <div className="text-xs text-gray-500 mb-1">{c.difficulty || "Ejercicios"}</div>
+                          <div className="text-xs text-gray-500 mb-1">Artículo</div>
                         ) : (
                           <div className="text-xs text-gray-500 mb-1">{(c.authors || []).join(", ") || "Libro"}</div>
                         )}
-                        <h2 className="text-sm font-medium">{c.title}</h2>
+                        <h2 className="text-base font-medium">{c.title}</h2>
                         {c.description && (
-                          <p className="text-xs text-gray-400 line-clamp-2 mt-1">{c.description}</p>
+                          <p className="text-sm text-gray-400 line-clamp-3 mt-1">{c.description}</p>
                         )}
                       </div>
                     </button>
                   ))}
                   {items.length === 0 && (
-                    <div className="text-sm text-gray-400">No se encontraron cursos. Ajusta tu búsqueda.</div>
+                    <div className="text-sm text-gray-400">No se encontraron contenidos. Ajusta tu búsqueda.</div>
                   )}
                 </div>
               )}
@@ -295,7 +374,7 @@ export default function CursosPage() {
               {!loading && source === "all" && (
                 <div className="space-y-6">
                   <div>
-                    <div className="text-sm text-gray-400 mb-2">Ejercicios</div>
+                    <div className="text-sm text-gray-400 mb-2">Contenidos</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {[...itemsText].sort((a, b) => a.title.localeCompare(b.title)).map((c) => (
                         <button
@@ -308,16 +387,16 @@ export default function CursosPage() {
                             <img src={c.thumbnail} alt={c.title} className="w-full h-36 object-cover rounded-xl mb-3" />
                           )}
                           <div className="min-w-0">
-                            <div className="text-xs text-gray-500 mb-1">{c.difficulty || "Ejercicios"}</div>
-                            <h2 className="text-sm font-medium">{c.title}</h2>
+                            <div className="text-xs text-gray-500 mb-1">Artículo</div>
+                            <h2 className="text-base font-medium">{c.title}</h2>
                             {c.description && (
-                              <p className="text-xs text-gray-400 line-clamp-2 mt-1">{c.description}</p>
+                              <p className="text-sm text-gray-400 line-clamp-3 mt-1">{c.description}</p>
                             )}
                           </div>
                         </button>
                       ))}
                       {itemsText.length === 0 && (
-                        <div className="text-sm text-gray-400">Sin ejercicios para esta búsqueda.</div>
+                        <div className="text-sm text-gray-400">Sin contenidos para esta búsqueda.</div>
                       )}
                     </div>
                   </div>
@@ -386,7 +465,7 @@ export default function CursosPage() {
                   <div className="relative w-full max-w-3xl bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="text-sm text-gray-400">
-                        {selected.kind === "youtube" ? "YouTube" : selected.kind === "text" ? "Ejercicios" : "Libros"}
+                        {selected.kind === "youtube" ? "Video" : selected.kind === "text" ? "Artículo" : "Libro"}
                       </div>
                       <button onClick={() => setSelected(null)} className="text-xs px-2 py-1 rounded-md border border-gray-700 text-gray-300 hover:bg-gray-800">Cerrar</button>
                     </div>
@@ -402,9 +481,9 @@ export default function CursosPage() {
                       </div>
                     ) : selected.kind === "text" ? (
                       <div className="space-y-2 mb-3">
-                        <div className="text-xs text-gray-500">{selected.item.difficulty || "Ejercicios"}</div>
+                        <div className="text-sm text-gray-500">Artículo</div>
                         {selected.item.description && (
-                          <div className="text-sm text-gray-300">{selected.item.description}</div>
+                          <div className="text-base md:text-lg text-gray-300">{selected.item.description}</div>
                         )}
                       </div>
                     ) : (
@@ -435,6 +514,9 @@ export default function CursosPage() {
                     <div className="flex items-center gap-2">
                       {selected.kind === "youtube" && selected.item.url && (
                         <a href={selected.item.url} target="_blank" rel="noopener noreferrer" className="text-xs px-3 py-1.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-600/40 hover:bg-amber-500/30">Abrir en fuente</a>
+                      )}
+                      {selected.kind === "text" && selected.item.url && (
+                        <a href={selected.item.url} target="_blank" rel="noopener noreferrer" className="text-xs px-3 py-1.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-600/40 hover:bg-amber-500/30">Abrir artículo completo</a>
                       )}
                       {selected.kind === "book" && selected.item.url && (
                         <button onClick={handleDownloadBook} className="text-xs px-3 py-1.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-600/40 hover:bg-emerald-500/30">Descargar libro</button>

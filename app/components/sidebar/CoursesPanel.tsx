@@ -21,7 +21,7 @@ export default function CoursesPanel() {
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-white">Cursos</h2>
+        <h2 className="text-sm font-semibold text-white">Contenidos</h2>
         <a href="/cursos" className="text-xs text-amber-400 hover:text-amber-300">Ver todos</a>
       </div>
 
